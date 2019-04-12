@@ -3,6 +3,7 @@ number.count = 0;
 function number(){
     return  number.count;
 }
+
 $(function() {
     $('input.search').click(function() {
         var c = 0;
@@ -27,3 +28,15 @@ $(function() {
     var err = $('input[name=err_number]').val();
     $("#to_remove").replaceWith("<b><font color='red'>Найдено ошибок: " + err + "</font></b><br>");
 })
+
+// свёртывание/развёртывание элемента div
+$(function() {
+    $('div.toggle').click(function() {
+        var attr = $(this).attr('id').substring(7);
+        $('div#toggle_' + attr).toggle();
+        $('div#content_' + attr).toggle(function () {
+            $(this).animate({}, 2000);
+        });
+    });
+});
+

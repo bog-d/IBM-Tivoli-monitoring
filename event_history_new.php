@@ -59,6 +59,7 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='10' class='pag
         echo "</td>";
         echo "<td width='25%' align='right' rowspan='0'>";
             $param = (isset($_GET["ServiceName"]) ? "ServiceName={$_GET["ServiceName"]}&" : "") .
+                     (isset($_GET["PTK"]) ? "ServiceName={$_GET["PTK"]}&" : "") .
                      (isset($_GET["KE_OBJECT"]) ? "KE_OBJECT={$_GET["KE_OBJECT"]}&" : "") .
                      (isset($_GET["INCIDENT"]) ? "INCIDENT={$_GET["INCIDENT"]}&" : "");
             echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank'>Перейти к старой версии</a><br><br><br>";

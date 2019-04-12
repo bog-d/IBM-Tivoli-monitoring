@@ -1741,8 +1741,11 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "</tr>";
     echo "</table><br \>";
 
-    echo "<h4 class='table_ael_toggle'>Показать/скрыть таблицу (количество строк: ".count($table_N1_1_data).")</h4>";
-    echo "<table class='ael_hide' border='1' cellspacing='0' cellpadding='5'>";
+    if (count($table_N1_1_data) == 0)
+        echo "Данные не найдены";
+    else {
+        echo "<h4 class='table_ael_toggle'>Показать/скрыть таблицу (количество строк: " . count($table_N1_1_data) . ")</h4>";
+        echo "<table class='ael_hide' border='1' cellspacing='0' cellpadding='5'>";
         echo "<tr>";
         foreach ($AEL_col_list_arr as $key => $val)
             if (!empty($key))
@@ -1750,54 +1753,60 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "</tr>";
         foreach ($table_N1_1_data as $val) {
             echo "<tr>";
-                foreach ($val as $key => $value)
-                    switch ($key) {
-                        case 'Serial':
-                            break;
-                        case 'Severity':
-                            switch ($value) {
-                                case "5":
-                                    $class = "red_status"; break;
-                                case "4":
-                                case "3":
-                                case "2":
-                                    $class = "yellow_status"; break;
-                                case "1":
-                                    $class = "blue_status"; break;
-                                case "0":
-                                    $class = "green_status"; break;
-                                default:
-                                    $class = ""; break;
-                            }
-                            echo "<td class='$class'>".array_search($value, $severity_codes)."</td>";
-                            break;
-                        case 'LastOccurrence':
-                        case 'FirstOccurrence':
-                            echo "<td>".date("d.m.Y H:i:s", $value)."</td>";
-                            break;
-                        case 'pfr_ke_tors':
-                            echo "<td><a href='http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$value}' target='blank' title='Перейти к КЭ в ТОРС'>{$value}</a></td>";
-                            break;
-                        case 'TTNumber':
-                            echo "<td><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
-                            break;
-                        case 'pfr_tsrm_class':
-                            $class = ($cell == "-30" or $cell == "-10" or $cell == "3" or $cell == "4") ? "blue_status" : "";
-                            echo "<td class='$class'>{$class_codes[$value]}</td>";
-                            break;
-                        default:
-                            echo "<td>$value</td>";
-                            break;
-                    }
+            foreach ($val as $key => $value)
+                switch ($key) {
+                    case 'Serial':
+                        break;
+                    case 'Severity':
+                        switch ($value) {
+                            case "5":
+                                $class = "red_status";
+                                break;
+                            case "4":
+                            case "3":
+                            case "2":
+                                $class = "yellow_status";
+                                break;
+                            case "1":
+                                $class = "blue_status";
+                                break;
+                            case "0":
+                                $class = "green_status";
+                                break;
+                            default:
+                                $class = "";
+                                break;
+                        }
+                        echo "<td class='$class'>" . array_search($value, $severity_codes) . "</td>";
+                        break;
+                    case 'LastOccurrence':
+                    case 'FirstOccurrence':
+                        echo "<td>" . date("d.m.Y H:i:s", $value) . "</td>";
+                        break;
+                    case 'pfr_ke_tors':
+                        echo "<td><a href='http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$value}' target='blank' title='Перейти к КЭ в ТОРС'>{$value}</a></td>";
+                        break;
+                    case 'TTNumber':
+                        echo "<td><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
+                        break;
+                    case 'pfr_tsrm_class':
+                        $class = ($cell == "-30" or $cell == "-10" or $cell == "3" or $cell == "4") ? "blue_status" : "";
+                        echo "<td class='$class'>{$class_codes[$value]}</td>";
+                        break;
+                    default:
+                        echo "<td>$value</td>";
+                        break;
+                }
             echo "</tr>";
         }
         echo "<tr>";
-            echo "<td colspan=0>";
-            echo "Общее количество строк в таблице: ".count($table_N1_1_data);
-            echo "<h4 class='table_ael_toggle'>Cкрыть таблицу</h4>";
-            echo "</td>";
+        echo "<td colspan=0>";
+        echo "Общее количество строк в таблице: " . count($table_N1_1_data);
+        echo "<h4 class='table_ael_toggle'>Cкрыть таблицу</h4>";
+        echo "</td>";
         echo "</tr>";
-    echo "</table>";
+        echo "</table>";
+    }
     echo "<br \>";
     echo "<br \>";
     echo "<hr>";

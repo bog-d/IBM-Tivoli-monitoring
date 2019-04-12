@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 	by GDV
-	2018 - RedSys
+	2019 - RedSys
 */ 
 	header('Content-Type: text/html;charset=UTF-8');
 ?>
@@ -11,6 +11,8 @@
     <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
 	<link href="css/style.css" type="text/css" rel="stylesheet">
     <title>Общий список Паспортов и Протоколов Мониторинга</title>
+    <script src="scripts/jquery-3.2.1.min.js"></script>
+    <script src="scripts/passports.js"></script>
 </head>
 <body>
 	<?php
@@ -107,8 +109,7 @@
                 "Регион" => $row['REGION'],
                 "Среда" => $row['ENVIRONMENT'],
                 "!count" => 1,
-                "!ptk_link" => "http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=".$row['SERVICE_NAME'],
-                "Подсистема" => $row['DISPLAYNAME'],
+                "Подсистема" => array( array('ServiceName' => $row['SERVICE_NAME'], 'DisplayName' => $row['DISPLAYNAME'])),
                 "!pass_link" => "http://10.103.0.60/pfr_other/Passports/Паспорт_".$row['PTK']."_".$row['REGION']."_".$row['ENVIRONMENT']."_версия_".$row['PASS_VERSION']."_от_".$row['PASS_DATE'].".".$row['PASS_FILE'],
                 "Паспорт" => $row['PASS_DISPLAY_NAME'],
                 "Версия Паспорта" => $row['PASS_VERSION']." от ".$row['PASS_DATE'],
@@ -120,6 +121,7 @@
             if (strcmp($row['SERVICE_NAME'], $service_name) != 0) {
                 $service_name = $row['SERVICE_NAME'];
                 $table_arr[$i]['!count']++;
+                $table_arr[$i]['Подсистема'][] = array('ServiceName' => $row['SERVICE_NAME'], 'DisplayName' => $row['DISPLAYNAME']);
             }
             if (empty($table_arr[$i]['Протокол']) and !empty($row['PROC_FILE'])) {
                 $table_arr[$i]['!proc_link'] ="http://10.103.0.60/pfr_other/Passports/Протокол_".$row['PTK']."_".$row['REGION']."_".$row['ENVIRONMENT']."_версия_".$row['PASS_VERSION']."_от_".$row['PROC_DATE'].".".$row['PROC_FILE'];
@@ -152,13 +154,32 @@
                                 break;
                             case '!pass_link':
                             case '!proc_link':
-                            case '!ptk_link':
                                 $href = $value;
                                 break;
                             case 'Подсистема':
-                                echo "<td><a href='$href' target='_blank' title='Перейти к просмотру всех версий по этой подсистеме'>$value</a>";
-                                if ($count > 1)
-                                    echo "<br>(кол-во подсистем: $count)";
+                                echo "<td>";
+                                    if ($count > 1) {
+                                        echo "<table><tr><td>";
+                                            echo "<div class='toggle' id='toggle_{$value[0]['ServiceName']}'><img src='images/details_open.png' title='Показать'></div>";
+                                            echo "<div class='toggle hide' id='toggle_{$value[0]['ServiceName']}'><img src='images/details_close.png' title='Скрыть'></div>";
+                                        echo "</td>";
+                                        echo "<td>";
+                                          echo "Кол-во подсистем: {$count} ";
+                                        echo "</td>";
+                                        echo "</tr><tr>";
+                                        echo "<td colspan='0'>";
+                                            echo "<div class='hide' id='content_{$value[0]['ServiceName']}'>";
+                                            foreach ($value as $v) {
+                                                    $href = "http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=".$v['ServiceName'];
+                                                    echo "<a href='$href' target='_blank' title='Перейти к просмотру всех версий по этой подсистеме'>{$v['DisplayName']}</a><br>";
+                                                }
+                                            echo "</div>";
+                                        echo "</td></tr></table>";
+                                    }
+                                    else {
+                                        $href = "http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=".$value[0]['ServiceName'];
+                                        echo "<a href='$href' target='_blank' title='Перейти к просмотру всех версий по этой подсистеме'>{$value[0]['DisplayName']}</a>";
+                                    }
                                 echo "</td>";
                                 break;
                             case 'Паспорт':
@@ -176,7 +197,7 @@
     echo "<br><br><hr><br><br>";
 
 
-    // ******************************************************************************************************************************
+    // ********************************************************************************************************************************
 
     // old part
 
