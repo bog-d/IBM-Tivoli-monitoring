@@ -154,6 +154,11 @@ echo "</table>";
             <td align="center">+</td>
         </tr>
         <tr>
+            <td>Поиск в пределах заданной подсистемы</td>
+            <td align="center">+</td>
+            <td align="center">+</td>
+        </tr>
+        <tr>
             <td>Одновременная фильтрация по определённым столбцам</td>
             <td align="center">+</td>
             <td align="center">+</td>
