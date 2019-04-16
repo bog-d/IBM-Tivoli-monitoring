@@ -28,7 +28,6 @@
     $User = '';
     $PassReset = '';
 
-    $standard_groups = ['Public' , 'Netcool_OMNIbus_User' , 'tbsmUsers' , 'tbsmViewAllServicesUsers' , 'tbsmReadOnly'];
 	$repeat = false;
     $output = '';
 
@@ -81,11 +80,13 @@
     // users info to array
     foreach ($nco_users as $str ) {
         list($group, $login, $name, $access) = explode('|', $str);
-        if (!in_array($login, $duty_accounts)) {
-            $users_array[$login]['group'][] = $group;
-            $users_array[$login]['name'] = $name;
-            $users_array[$login]['access'] = $access;
-        }
+        $users_array[$login]['name'] = $name;
+        $users_array[$login]['access'] = $access;
+        $users_array[$login]['group'][] = $group;
+        $users_array[$login]['hidden'] = (isset($users_array[$login]['hidden']) and $users_array[$login]['hidden']) ? true : false;
+
+        if (in_array($login, $service_accounts) or in_array($group, $service_groups))
+            $users_array[$login]['hidden'] = true;
     }
     ksort($users_array);
 
@@ -96,6 +97,8 @@
     <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post" id="formManage">
         <p align="center">
             <button type="submit" name="addUsers" value="Добавить УЗ" title="Добавить учётные записи TBSM" <?php echo $acs_form ? '' : 'disabled'; ?> /><img src="images/new.png">&emsp;Добавить УЗ</button>
+            &emsp;&emsp;
+            <button type="button" id="service_view" title="Показать служебные учётные записи TBSM" <?php echo $acs_role == 'admin' ? '' : 'hidden'; ?> /><img src="images/eye.png">&emsp;Служебные УЗ</button>
         </p>
         <br>
         <table class='tbsm_users' align="center" cellspacing="0" cellpadding="5" border="1">
@@ -109,7 +112,7 @@
                 <th>Членство в группах</th>
                 <th>Действия</th>
             </tr>
-            <tr>
+<!--            <tr>
                 <td colspan="2" class='col_filter'></td>
                 <td class='col_filter' align='center'>
                     <select size="1" id="dynamic_type" title="Динамический фильтр по типу УЗ">
@@ -122,18 +125,19 @@
                     <select size="1" id="dynamic_category" title="Динамический фильтр по категории УЗ">
                         <option value = 'все' selected>все</option>
                         <?php
-                        foreach ($ldap_group_name as $cat => $vis)
+/*                        foreach ($ldap_group_name as $cat => $vis)
                             echo "<option value = '{$vis}'>{$vis}</option>";
-                        ?>
+                        */?>
                     </select>
                 </td>
                 <td colspan="0" class='col_filter'></td>
             </tr>
-
+-->
             <?php
             $i = 0;
-            foreach ($users_array as $user => $param ) { ?>
-                <tr class='row_filtered'>
+            foreach ($users_array as $user => $param ) {
+                echo "<tr class='row_filtered ".($param['hidden'] ? "new_records rec_hide" : "")."'>";
+                    ?>
                     <!-- Логин -->
                     <td class=''>
                         <?php echo $user; ?>

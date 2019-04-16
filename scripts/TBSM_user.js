@@ -103,3 +103,11 @@ $(function() {
 });
 
 */
+
+// показ/скрытие строк со служебными учётками
+$(function() {
+    $('#service_view').click(function() {
+            $('tr.row_filtered').toggle();
+            this.setAttribute('title', this.getAttribute('title').indexOf('Показать') == 0 ? 'Скрыть служебные учётные записи TBSM' : 'Показать служебные учётные записи TBSM');
+    });
+});

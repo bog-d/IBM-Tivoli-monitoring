@@ -133,7 +133,9 @@ $visibility_group = array (
     ''                 => "&emsp;&emsp;---",
 );
 
-$duty_accounts = array ( 'tbsmadmin', 'tbsmuser', 'root', 'ncoadmin', 'ncouser', 'nobody', );
+$standard_groups = array ('Public' , 'Netcool_OMNIbus_User' , 'tbsmUsers' , 'tbsmViewAllServicesUsers' , 'tbsmReadOnly');
+$service_accounts = array ( 'tbsmadmin', 'tbsmuser', 'root', 'ncoadmin', 'ncouser', 'nobody', );
+$service_groups = array ('pfr_service_users' , 'pfr_redsys_admins' , 'pfr_integrational_users');
 
 // ******************************************************************************************************************************
 
