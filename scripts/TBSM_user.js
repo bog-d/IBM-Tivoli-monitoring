@@ -55,36 +55,31 @@ function checkChecked() {
 }
 
 // динамическая фильтрация строк в таблице по значению одного столбца
-$(function() {
-    $('#dynamic_type').change(function() {
-        $('table.tbsm_users tr.row_filtered').each(function() {
-            var passed = true;
-            $(this).children().each(function () {
-                var filter_id = $(this).attr('class');
-                if (filter_id != '') {
-                    var filter_value = ($("#" + filter_id).val() == 'все' ? "" : $("#" + filter_id).val());
-                    passed = (passed && (this.innerHTML.indexOf(filter_value) >= 0));
-                }
-            });
-            $(this).toggle(passed);
+function cell_filter() {
+    $('table.tbsm_users tr.row_filtered').each(function () {
+        if (show_service)
+            var passed = ($(this).attr('class').indexOf('new_records') != -1);
+        else
+            var passed = ($(this).attr('class').indexOf('new_records') == -1);
+
+        $(this).children().each(function () {
+            var filter_id = $(this).attr('class');
+            if (filter_id != '') {
+                var filter_value = ($("#" + filter_id).val() == 'все' ? "" : $("#" + filter_id).val());
+                passed = (passed && (this.innerHTML.indexOf(filter_value) >= 0));
+            }
         });
+
+        $(this).toggle(passed);
     });
+}
+
+$(function() {
+    $('#dynamic_type').change(cell_filter);
 });
 
 $(function() {
-    $('#dynamic_category').change(function() {
-        $('table.tbsm_users tr.row_filtered').each(function() {
-            var passed = true;
-            $(this).children().each(function () {
-                var filter_id = $(this).attr('class');
-                if (filter_id != '') {
-                    var filter_value = ($("#" + filter_id).val() == 'все' ? "" : $("#" + filter_id).val());
-                    passed = (passed && (this.innerHTML.indexOf(filter_value) >= 0));
-                }
-            });
-            $(this).toggle(passed);
-        });
-    });
+    $('#dynamic_category').change(cell_filter);
 });
 
 /*
@@ -105,9 +100,29 @@ $(function() {
 */
 
 // показ/скрытие строк со служебными учётками
+var show_service = false;
+
 $(function() {
     $('#service_view').click(function() {
-            $('tr.row_filtered').toggle();
-            this.setAttribute('title', this.getAttribute('title').indexOf('Показать') == 0 ? 'Скрыть служебные учётные записи TBSM' : 'Показать служебные учётные записи TBSM');
+        $('#dynamic_type option:first').prop('selected', true);
+        $('#dynamic_category option:first').prop('selected', true);
+        $('tr.row_footer').toggle();
+
+        if (this.getAttribute('title').indexOf('Показать служебные') == 0) {
+            this.setAttribute('title', 'Показать общие учётные записи TBSM');
+            $('div#btn_serv').html("<img src='images/eye.png'>&emsp;Общие УЗ");
+            $('tr.row_filtered').each(function () {
+                $(this).toggle($(this).attr('class').indexOf('new_records') != -1);
+            });
+            show_service = true;
+        }
+        else {
+            this.setAttribute('title', 'Показать служебные учётные записи TBSM');
+            $('div#btn_serv').html("<img src='images/key.png'>&emsp;Служебные УЗ");
+            $('tr.row_filtered').each(function () {
+                $(this).toggle($(this).attr('class').indexOf('new_records') == -1);
+            });
+            show_service = false;
+        }
     });
 });

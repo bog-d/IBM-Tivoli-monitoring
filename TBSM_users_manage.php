@@ -89,17 +89,16 @@
             $users_array[$login]['hidden'] = true;
     }
     ksort($users_array);
-
     ?>
     <br \>
 
     <!-- exist user actions form -->
     <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post" id="formManage">
-        <p align="center">
+        <div align="center">
             <button type="submit" name="addUsers" value="Добавить УЗ" title="Добавить учётные записи TBSM" <?php echo $acs_form ? '' : 'disabled'; ?> /><img src="images/new.png">&emsp;Добавить УЗ</button>
             &emsp;&emsp;
-            <button type="button" id="service_view" title="Показать служебные учётные записи TBSM" <?php echo $acs_role == 'admin' ? '' : 'hidden'; ?> /><img src="images/eye.png">&emsp;Служебные УЗ</button>
-        </p>
+            <button type="button" id="service_view" title="Показать служебные учётные записи TBSM" <?php echo $acs_role == 'admin' ? '' : 'hidden'; ?> /><div id="btn_serv"><img src="images/key.png">&emsp;Служебные УЗ</div></button>
+        </div>
         <br>
         <table class='tbsm_users' align="center" cellspacing="0" cellpadding="5" border="1">
             <tr>
@@ -112,7 +111,7 @@
                 <th>Членство в группах</th>
                 <th>Действия</th>
             </tr>
-<!--            <tr>
+            <tr>
                 <td colspan="2" class='col_filter'></td>
                 <td class='col_filter' align='center'>
                     <select size="1" id="dynamic_type" title="Динамический фильтр по типу УЗ">
@@ -125,17 +124,21 @@
                     <select size="1" id="dynamic_category" title="Динамический фильтр по категории УЗ">
                         <option value = 'все' selected>все</option>
                         <?php
-/*                        foreach ($ldap_group_name as $cat => $vis)
+                        foreach ($ldap_group_name as $cat => $vis)
                             echo "<option value = '{$vis}'>{$vis}</option>";
-                        */?>
+                        ?>
                     </select>
                 </td>
                 <td colspan="0" class='col_filter'></td>
             </tr>
--->
+
             <?php
-            $i = 0;
+            $i_comm = $i_serv = 0;
             foreach ($users_array as $user => $param ) {
+                if($param['hidden'])
+                    $i_serv++;
+                else
+                    $i_comm++;
                 echo "<tr class='row_filtered ".($param['hidden'] ? "new_records rec_hide" : "")."'>";
                     ?>
                     <!-- Логин -->
@@ -217,11 +220,13 @@
                         <button type="submit" name="sendRequestManage" value="Удалить пользователя;<?php echo $user; ?>" title="Удалить пользователя <?php echo $user; ?>" onclick="return confirm('Пользователь будет удалён! Вы уверены?');" <?php echo $acs_form ? '' : 'disabled'; ?> /><img src="images/delete.png"></button>
                     </td>
                 </tr> <?php
-                $i++;
             }
             ?>
-            <tr>
-                <th colspan="0">Всего записей: <?php echo $i; ?></th>
+            <tr class="row_footer">
+                <th colspan="0">Всего записей: <?php echo $i_comm; ?></th>
+            </tr>
+            <tr class="row_footer rec_hide">
+                <th colspan="0">Всего записей: <?php echo $i_serv; ?></th>
             </tr>
         </table>
     </form>

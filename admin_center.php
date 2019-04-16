@@ -24,14 +24,13 @@
 	<?php	
 		include 'functions/user_roles.php';
 
+        $acs_user = $acs_role = '';
 		$output = '(авторизуйтесь для активации ссылок)';
 
         // user access codes load from file and check
         $acs = auth(isset($_POST['txtpass']) ? $_POST['txtpass'] : '');
         if(!empty($acs))
             list($acs_user, $acs_role) = explode(';', $acs);
-        if ($acs_role <> 'admin')
-            $acs_user = '';
     ?>
 	
 	<table align="center">
@@ -60,18 +59,24 @@
             </td>
 		</tr>
 		<tr>
-			<td colspan="0"><img src="images/admin_center.jpg" width="1000" height="512" alt="Навигация" <?php echo empty($acs_user) ? '' : "usemap=\"#Navigation\""; ?>></td>
+			<td colspan="0"><img src="images/admin_center.jpg" width="1000" height="512" alt="Навигация"
+                    <?php echo $acs_role == 'admin' ? "usemap='#Admin_Navigation'" : ''; ?>
+                    <?php echo $acs_role == 'user' ? "usemap='#User_Navigation'" : ''; ?>
+            ></td>
         </tr>
 	</table>
   
-	<p><map name="Navigation">
-        <!-- <area coords="  0,  0,1000,100" href="" "> -->
+	<p><map name="Admin_Navigation">
 		<area coords=" 15,420,350,500" href="integrity_check.php" title="Проверка целостности PFR_LOCATIONS по различным критериям" target="_blank">
 		<area coords="720,390,930,460" href="users_manage.php" title="Управление пользователями" target="_blank">
 		<area coords="790,250,990,320" href="Stopped_sutuations.php" title="Список остановленных ситуаций" target="_blank">
         <area coords=" 10,290,300,360" href="Sits_constructor.php" title="Конструктор ситуаций мониторинга" target="_blank">
         <area coords="400,440,690,480" href="incident_close.php" title="Закрытие инцидентов в СТП" target="_blank">
 	</map></p>
+
+    <p><map name="User_Navigation">
+            <area coords="720,390,930,460" href="TBSM_users_manage.php" title="Управление пользователями" target="_blank">
+    </map></p>
 
     <!-- pop-up help window -->
     <div class="overlay" title=""></div>
