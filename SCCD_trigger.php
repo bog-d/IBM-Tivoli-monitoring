@@ -1783,11 +1783,20 @@ header('Content-Type: text/html;charset=UTF-8');
                     case 'FirstOccurrence':
                         echo "<td>" . date("d.m.Y H:i:s", $value) . "</td>";
                         break;
+                    case 'Tally':
+                        echo "<td align='right'>$value</td>";
+                        break;
                     case 'pfr_ke_tors':
                         echo "<td><a href='http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$value}' target='blank' title='Перейти к КЭ в ТОРС'>{$value}</a></td>";
                         break;
                     case 'TTNumber':
-                        echo "<td><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
+                        echo "<td align='center'><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
+                        break;
+                    case 'pfr_tsrm_worder':
+                        echo "<td align='center'>".str_replace(';', '<br>', $value)."</td>";
+                        break;
+                    case 'pfr_tsrm_worder_delay':
+                        echo "<td align='right'>$value</td>";
                         break;
                     case 'pfr_tsrm_class':
                         $class = ($cell == "-30" or $cell == "-10" or $cell == "3" or $cell == "4") ? "blue_status" : "";
