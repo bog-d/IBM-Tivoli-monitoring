@@ -8,28 +8,33 @@ require_once('../connections/WHMSK.php');
 require_once('../connections/WHFED.php');
 require_once('../functions/utime.php');
 
-$serial = $_POST['serial'];
-$graph = $_POST['graph'];
-
-// get data from AEL
-$first_occurrence_str = '2019-04-15 13:59:00';
-$node = 'SL10100008126i:LZ';
-$object = 'SL10100008126I';
-$ke = 'SL10100008126I';
-$sit_code = 'LZ_DISK_SPACE_LOW';
-$incidents = array (
-    '27836293',
+$scales_arr = array(
+5 => array('sec' => 300,        'axes' => 'second', 'step' => 15),    // 5 min
+4 => array('sec' => 1800,       'axes' => 'minute', 'step' => 5),    // half hour
+3 => array('sec' => 3600,       'axes' => 'minute', 'step' => 10),    // 1 hour
+2 => array('sec' => 3600*6,     'axes' => 'minute', 'step' => 30),      // 6 hours
+1 => array('sec' => 3600*12,    'axes' => 'hour',   'step' => 1),       // 12 hours
+0 => array('sec' => 3600*24,    'axes' => 'hour',   'step' => 2),       // day
 );
 
-// get data from TEMS
+$data = [];
+$graph = $_POST['graph'];
+$scale =  $_POST['scale'];
+$shift = $_POST['shift'];
+$node = strtoupper($_POST['inp_node']); $node_2 = str_replace('I', 'i', $node);
+$first_occurrence_str = str_replace('T', ' ', $_POST['inp_time']);
+
+// get data from AEL, TEMS, etc
+$object = str_replace(':LZ', '', $node);;
+$sit_code = 'LZ_DISK_SPACE_LOW';
 $frequency = 300; // seconds
 $checks = 1;
 
 // datetime conversion
 $first_occurrence_utime = utime($first_occurrence_str);
 $start_sit_utime = $first_occurrence_utime - $frequency * $checks;
-$start_graph_utime = $start_sit_utime - 3600;
-$end_graph_utime = $start_sit_utime + 3600;
+$start_graph_utime = $start_sit_utime - $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
+$end_graph_utime = $start_sit_utime + $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
 $start_sit_str = date('Y-m-d H:i:s', $start_sit_utime);
 
 // get data from SCCD
@@ -42,7 +47,7 @@ $start_time_db2 = '1'.date('ymdHis', $start_graph_utime);
 $end_time_db2 = '1'.date('ymdHis', $end_graph_utime);
 $wh_select = "select \"Timestamp\" as T, \"Disk_Used_Percent\" as VALUE
                 from UMSK.\"KLZ_Disk\"
-                where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and \"System_Name\" = '{$node}' and \"Mount_Point\" = '/'
+                where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and \"Mount_Point\" = '/' and (\"System_Name\" = '{$node}' or \"System_Name\" = '{$node_2}')
                 order by \"Timestamp\" asc";
 
 // operative graph
@@ -63,6 +68,8 @@ if ($graph == 'operative') {
 
     // ajax return
     echo json_encode(array(
+        'axes' => $scales_arr[$scale]['axes'],
+        'step' => $scales_arr[$scale]['step'],
         'metrics' => $data,
         'start_sit' => $start_sit_str,
         'first_occurrence' => $first_occurrence_str,

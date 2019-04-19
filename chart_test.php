@@ -13,52 +13,54 @@
 
     <style type="text/css">
         #chart-operative {
-            width: 1300px;
+            width: 1800px;
         }
         #chart-historical {
-            width: 900px;
+            width: 1000px;
         }
     </style>
 </head>
 <body>
 
-<table id="chart-operative" cellspacing="20">
+<table id="chart-operative" width="100%" cellpadding="30">
     <tr>
         <td>
             <canvas id="graph-operative"></canvas>
         </td>
-        <td valign="top">
-            <table class='gantt' cellpadding="10">
-                <tr>
-                    <td class='gantt'>Номер события:</td>
-                    <td class='gantt'>65173965</td>
-                </tr>
-                <tr>
-                    <td class='gantt'>Узел:</td>
-                    <td class='gantt'>SL10100008126I:LZ</td>
-                </tr>
-                <tr>
-                    <td class='gantt'>Объект:</td>
-                    <td class='gantt'>SL10100008126I</td>
-                </tr>
-                <tr>
-                    <td class='gantt'>КЭ:</td>
-                    <td class='gantt'>SL10100008126I</td>
-                </tr>
+        <td align="center" width="10%">
+            Масштаб:
+            <br><br>
+            <button id="scale_plus" title="Увеличить масштаб..."><b>&nbsp;<font size="+1>">+</font>&nbsp;</b></button>&emsp;
+            <button id="scale_minus" title="Уменьшить масштаб..."><b>&nbsp;<font size="+1>">-</font>&nbsp;</b></button>
+            <br><br><br><br>
+            История:
+            <br><br>
+            <button id="prev" title="Назад, в прошлое..."><b>&nbsp;<font size="+1>"><</font>&nbsp;</b></button>&emsp;
+            <button id="next" title="Вперёд, в будущее..."><b>&nbsp;<font size="+1>">></font>&nbsp;</b></button>
+        </td>
+        <td>
+            <table class='gantt ael_hide' cellpadding="10">
                 <tr>
                     <td class='gantt'>Код события:</td>
                     <td class='gantt'>LZ_DISK_SPACE_LOW</td>
                 </tr>
                 <tr>
-                    <td class='gantt'>Номера инцидентов:</td>
-                    <td class='gantt'>27836293</td>
+                    <td class='gantt'>Узел:</td>
+                    <td class='gantt'><input id="inp_node" value="SL10100011030I:LZ"></td>
+                </tr>
+                <tr>
+                    <td class='gantt'>Время:</td>
+                    <td class='gantt'><input type="datetime-local" id="inp_time" value="2019-04-16T07:28"></td>
+                </tr>
+                <tr>
+                    <td class='gantt' colspan="2" align="center"><button id="view">Посмотреть</button></td>
                 </tr>
             </table>
         </td>
     </tr>
 </table>
 
-<table id="chart-historical" cellspacing="20">
+<table id="chart-historical" cellpadding="20">
     <tr>
         <td>
             <canvas id="graph-historical"></canvas>
