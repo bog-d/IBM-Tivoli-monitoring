@@ -172,16 +172,9 @@ $(document).ready(function() {
     table.columns().every( function () {
         var that = this;
 
-        if ($('input', this.header()).val()) {
-            if ($('input', this.header()).val().length > 0) {
-                table.search($('input', this.header()).val());
-                this.draw();
-            }
-        }
-
         if ($('input', this.footer()).val()) {
             if ($('input', this.footer()).val().length > 0) {
-                this.search($('input', this.footer()).val());
+                this.search('^' + $('input', this.footer()).val());
                 this.draw();
             }
         }

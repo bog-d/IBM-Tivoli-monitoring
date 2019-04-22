@@ -79,8 +79,12 @@ if (!empty($_POST)) {
                 else
                     $search_arr[] = "{$field} = {$search}";
             }
-            else
-                $search_arr[] = "{$field} like '%{$search}%'";
+            else {
+                if (strpos($search, '^') === 0)
+                    $search_arr[] = "{$field} = '".substr($search, 1)."'";
+                else
+                    $search_arr[] = "{$field} like '%{$search}%'";
+            }
     }
     $search_string = implode(' and ', $search_arr);
 

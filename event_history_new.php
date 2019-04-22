@@ -88,17 +88,33 @@ echo "<table id='events' class='display compact hover' width='100%'>";
         echo "<tr>";
             foreach ($captions as $key => $type) {
                 switch ($key) {
-                    case 'Объект': $value = isset($_GET["ServiceName"]) ? $_GET["ServiceName"] : ""; break;
-                    case 'КЭ': $value = isset($_GET["KE_OBJECT"]) ? $_GET["KE_OBJECT"] : ""; break;
-                    case 'Номер инцидента': $value = isset($_GET["INCIDENT"]) ? $_GET["INCIDENT"] : ""; break;
-                    default: $value = ''; break;
+                    case 'Объект':
+                        $value = isset($_GET["ServiceName"]) ? $_GET["ServiceName"] : "";
+                        break;
+                    case 'КЭ':
+                        $value = isset($_GET["KE_OBJECT"]) ? $_GET["KE_OBJECT"] : "";
+                        break;
+                    case 'Номер инцидента':
+                        $value = isset($_GET["INCIDENT"]) ? $_GET["INCIDENT"] : "";
+                        break;
+                    default:
+                        $value = '';
+                        break;
                 }
                 switch ($type) {
-                    case 'input': echo "<th><input type='text' placeholder='Поиск...' value='{$value}' /></th>"; break;
-                    case 'input*2': echo "<th><input type='date' id='start' placeholder='ГГГГ-ММ-ДД' value='{$value}' title='Начало диапазона времени'/><br>
-                                              <input type='date' id='finish' placeholder='ГГГГ-ММ-ДД' value='{$value}' title='Конец диапазона времени'/></th>"; break;
-                    case 'select': echo "<th><select><option value=''>Все</option></select></th>"; break;
-                    default: echo "<th></th>"; break;
+                    case 'input':
+                        echo "<th><input type='text' placeholder='Поиск...' value='{$value}' /></th>";
+                        break;
+                    case 'input*2':
+                        echo "<th><input type='date' id='start' placeholder='ГГГГ-ММ-ДД' value='{$value}' title='Начало диапазона времени'/><br>
+                                              <input type='date' id='finish' placeholder='ГГГГ-ММ-ДД' value='{$value}' title='Конец диапазона времени'/></th>";
+                        break;
+                    case 'select':
+                        echo "<th><select><option value=''>Все</option></select></th>";
+                        break;
+                    default:
+                        echo "<th></th>";
+                        break;
                 }
             }
         echo "</tr>";
