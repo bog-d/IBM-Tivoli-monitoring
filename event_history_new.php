@@ -20,6 +20,11 @@ header('Content-Type: text/html;charset=UTF-8');
     <script src="scripts/event_history_new.js"></script>
     <script src="scripts/cellSelection.min.js"></script>
 
+    <script src="Chart/Chart.bundle.min.js"></script>
+    <script src="Chart/chartjs-plugin-annotation.js"></script>
+    <script src="scripts/chart_show.js"></script>
+    <link rel="stylesheet" type="text/css" href="Chart/Chart.min.css">
+
     <style>
         td.details-control {
             background: url('images/details_open.png') no-repeat center center;
@@ -62,8 +67,8 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='10' class='pag
                      (isset($_GET["PTK"]) ? "ServiceName={$_GET["PTK"]}&" : "") .
                      (isset($_GET["KE_OBJECT"]) ? "KE_OBJECT={$_GET["KE_OBJECT"]}&" : "") .
                      (isset($_GET["INCIDENT"]) ? "INCIDENT={$_GET["INCIDENT"]}&" : "");
-            echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank'>Перейти к старой версии</a><br><br><br>";
-            echo "<a class='open_window' href='#'><img src='images/help.png' hspace='5' height='24' width='24' align='middle' title='Справка по функционалу'>Справка</a>";
+            echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br><br>";
+            echo "<a class='open_window' href='#' title='Справка по функционалу журнала событий'><img src='images/help.png' hspace='5' height='24' width='24' align='middle' title='Справка по функционалу'>Справка</a>";
         echo "</td>";
     echo "</tr>";
     echo "<tr>";
@@ -122,6 +127,9 @@ echo "<table id='events' class='display compact hover' width='100%'>";
 echo "</table>";
 
 ?>
+
+<br><br>
+<canvas id="graph-operative"></canvas>
 
 <!-- pop-up help window -->
 <div class="overlay" title=""></div>

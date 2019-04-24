@@ -212,10 +212,10 @@ $AEL_col_list_arr = array(
 );
 
 // function to get active events from AEL
-function ael_request($ke) {
+function ael_request($param, $value) {
     $event_arr = [];
 
-    exec("curl -X GET --insecure --connect-timeout 10 --user root:passw0rd \"http://10.103.0.60:9595/objectserver/restapi/alerts/status?filter=pfr_ke_tors='{$ke}'&collist=".implode(',', $GLOBALS['AEL_col_list_arr'])."\"", $arr_data);
+    exec("curl -X GET --insecure --connect-timeout 10 --user root:passw0rd \"http://10.103.0.60:9595/objectserver/restapi/alerts/status?filter={$param}='{$value}'&collist=".implode(',', $GLOBALS['AEL_col_list_arr'])."\"", $arr_data);
     $json_arr = json_decode(implode(' ', $arr_data), true);
 
     foreach ($json_arr['rowset']['rows'] as $event)

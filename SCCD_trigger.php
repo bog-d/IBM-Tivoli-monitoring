@@ -967,7 +967,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 }
             }
             // AEL
-            foreach (ael_request($ke_tors['ke']) as $key => $val)
+            foreach (ael_request('pfr_ke_tors', $ke_tors['ke']) as $key => $val)
                 if (!array_key_exists($key, $table_N1_1_data))
                     $table_N1_1_data[$key] = $val;
         }

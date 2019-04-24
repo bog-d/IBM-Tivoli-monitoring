@@ -1,3 +1,5 @@
+var SERIAL;
+
 $(document).ready(function() {
     var table = $('#events').DataTable( {
         ajax: {
@@ -218,6 +220,7 @@ $(document).ready(function() {
 
     function format ( d ) {
         // `d` is the original data object for the row
+        SERIAL = d.SERIAL;
         return '<table cellpadding="0" cellspacing="10" border="0" style="padding-left:50px;">'+
                 '<tr>'+
                     '<td>Описание ситуации:</td>'+
@@ -230,10 +233,10 @@ $(document).ready(function() {
                         'title="Перейти в форму по имени объекта мониторинга..."><img src="images/link.png" align="top" hspace="5">перейти по объекту</a>&emsp;&emsp;'+
                         '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + d.PFR_KE_TORS + '" target="_blank"' +
                         'title="Перейти в форму по имени КЭ..."><img src="images/link.png" align="top" hspace="5">перейти по КЭ</a>' +
+                        '&emsp;&emsp;<input type="button" onclick="showGraph_operative(SERIAL)" style="background-color: white;">' +
                     '</td>' +
                 '</tr>'+
             '</table>';
     }
 } );
-
 

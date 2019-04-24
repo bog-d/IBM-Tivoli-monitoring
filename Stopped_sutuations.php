@@ -17,7 +17,7 @@
 <body>
 	<?php
     require_once 'connections/TBSM.php';
-    require 'user_roles.php';
+    require 'user_roles_new.php';
 
 	// connection to TBSM database
 	if (!$connection_TBSM)
