@@ -7,6 +7,7 @@ if (!isset($_POST))
 require_once('../connections/WHFED.php');
 require_once('../connections/TBSM.php');
 require_once('../functions/utime.php');
+require_once('../functions/tbsm.php');
 
 $scales_arr = array(
     5 => array('sec' => 300,        'axes' => 'second',     'step' => 15),      // 5 min
@@ -18,6 +19,14 @@ $scales_arr = array(
 );
 
 $sits_arr = array(
+    'LZ_CPU_LOAD_HIGH'     => array(
+        'metrica'   => "\"Busy_CPU\"",
+        'table'     => "\"KLZ_CPU\"",
+        'object'    => "\"System_Name\"",
+        'replace'   => array("I:LZ" => "i:LZ"),
+        'where'     => "and \"CPU_ID\" = -1",
+        'title'     => "% загрузки процессора",
+        ),
     'LZ_DISK_SPACE_LOW'     => array(
         'metrica'   => "\"Disk_Used_Percent\"",
         'table'     => "\"KLZ_Disk\"",
@@ -25,7 +34,23 @@ $sits_arr = array(
         'replace'   => array("I:LZ" => "i:LZ"),
         'where'     => "and \"Mount_Point\" = '/'",
         'title'     => "% использования диска",
-        ),
+    ),
+    'LZ_MEMORY_LOW'     => array(
+        'metrica'   => "\"Net_Memory_Used_Pct\"",
+        'table'     => "\"KLZ_VM_Stats\"",
+        'object'    => "\"System_Name\"",
+        'replace'   => array("I:LZ" => "i:LZ"),
+        'where'     => "",
+        'title'     => "% использования памяти",
+    ),
+    'NT_CPU_LOAD_HIGH'     => array(
+        'metrica'   => "\"%_Processor_Time\"",
+        'table'     => "\"NT_Processor\"",
+        'object'    => "\"Server_Name\"",
+        'replace'   => array("PRIMARY:" => "Primary:"),
+        'where'     => "and \"Processor\" = '_Total'",
+        'title'     => "% загрузки процессора",
+    ),
     'NT_DISK_SPACE_LOW'     => array(
         'metrica'   => "\"%_Used\"",
         'table'     => "\"NT_Logical_Disk\"",
@@ -33,6 +58,14 @@ $sits_arr = array(
         'replace'   => array("PRIMARY:" => "Primary:"),
         'where'     => "and \"Disk_Name\" = '_Total'",
         'title'     => "% использования диска",
+    ),
+    'NT_MEMORY_LOW'     => array(
+        'metrica'   => "\"Memory_Usage_Percentage\"",
+        'table'     => "\"NT_Memory_64\"",
+        'object'    => "\"Server_Name\"",
+        'replace'   => array("PRIMARY:" => "Primary:"),
+        'where'     => "",
+        'title'     => "% использования памяти",
     ),
 );
 
@@ -61,8 +94,9 @@ if (empty($history_arr)) {
 $first_occurrence = utime($history_arr[0]['FIRST_OCCURRENCE']);
 $last_occurrence = utime($history_arr[count($history_arr) - 1]['LAST_OCCURRENCE']);
 $sit_code = $history_arr[0]['PFR_SIT_NAME'];
-$region = $history_arr[0]['PFR_ID_TORG'] == '101' ? 'MSK' : $history_arr[0]['PFR_ID_TORG'];
-$severity = $history_arr[0]['SEVERITY'] == 5 ? 'Critical' : 'Warning';
+$region = $history_arr[0]['PFR_ID_TORG'] == '201' ? '087' : ($history_arr[0]['PFR_ID_TORG'] == '092' ? '091' : $history_arr[0]['PFR_ID_TORG']);
+$region_wh = $region == '101' ? 'MSK' : $region;
+$severity = array_search($history_arr[0]['SEVERITY'], $severity_codes);
 
 // if the situation is not eligible
 if (!array_key_exists($sit_code, $sits_arr)) {
@@ -77,7 +111,7 @@ foreach ($sits_arr[$sit_code]['replace'] as $search => $replace)
     $node_WH = str_replace($search, $replace, $node_WH);
 
 // WH database connection options
-$database_reg = "WH{$region}";
+$database_reg = "WH{$region_wh}";
 $user_reg = 'db2inst1';
 $password_reg = 'passw0rd';
 $hostname_reg = 'tdw-main';
@@ -85,13 +119,13 @@ $port_reg = 50000;
 $connection_reg = db2_connect("DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database_reg;HOSTNAME=$hostname_reg;PORT=$port_reg;PROTOCOL=TCPIP;UID=$user_reg;PWD=$password_reg;", '', '');
 if (!$connection_reg) {
     echo json_encode(array(
-        'error' => "Нет соединения с БД WH{$region}.",
+        'error' => "Нет соединения с БД WH{$region_wh}.",
     ));
     exit();
 }
 
 // get data about situation
-$select = "select distinct INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$history_arr[0]['PFR_ID_TORG']}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
+$select = "select distinct INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$region}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
 $stmt = db2_prepare($connection_TBSM, $select);
 $result = db2_execute($stmt);
 $row = db2_fetch_assoc($stmt);
@@ -139,7 +173,7 @@ $end_graph = $last_occurrence + $scales_arr[$scale]['sec'] + $shift * $scales_ar
 $start_time_db2 = '1'.date('ymdHis', $start_graph);
 $end_time_db2 = '1'.date('ymdHis', $end_graph);
 $select_wh = "select \"Timestamp\" as T, {$sits_arr[$sit_code]['metrica']} as VALUE
-                from U{$region}.{$sits_arr[$sit_code]['table']}
+                from U{$region_wh}.{$sits_arr[$sit_code]['table']}
                 where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and {$sits_arr[$sit_code]['object']} = '{$node_WH}' {$sits_arr[$sit_code]['where']}
                 order by \"Timestamp\" asc";
 $stmt_wh = db2_prepare($connection_reg, $select_wh);

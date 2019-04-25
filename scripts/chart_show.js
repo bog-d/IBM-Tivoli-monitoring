@@ -50,9 +50,14 @@ $(function() {
 
 
 function showGraph_operative(serial) {
-    if (typeof lineGraph !== 'undefined')
+    if (typeof lineGraph !== 'undefined') {
         lineGraph.destroy();
-    $ser_number = serial;
+    }
+    if ($ser_number != serial) {
+        $ser_number = serial;
+        $scale = -1;
+        $time_shift = 0;
+    }
 
     $.ajax({
         url: "ajax/chart.php",
