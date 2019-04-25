@@ -1,5 +1,5 @@
 var lineGraph;
-var $scale = 3;
+var $scale = -1;
 var $time_shift = 0;
 
 $(function() {
@@ -47,16 +47,15 @@ function showGraph_operative(serial) {
     $.ajax({
         url: "ajax/chart.php",
         type: "POST",
-        data: {'graph':'operative', 'scale':$scale, 'shift':$time_shift, 'serial':serial},
+        data: {'scale':$scale, 'shift':$time_shift, 'serial':serial},
         dataType: 'json',
         success: function (data) {
-/*
             if (data.error.length > 0) {
                 alert(data.error);
-                exit;
+                return;
             }
-*/
             // console.log(data);
+            $scale = data.scale;
             var time = [];
             var metrics = [];
 
@@ -88,7 +87,7 @@ function showGraph_operative(serial) {
                         fontSize: 16,
                         fontStyle: '',
                         padding: 20,
-                        text: 'График по выбранной метрике мониторинга'
+                        // text: 'График по выбранной метрике мониторинга'
                     },
                     legend: {
                         display: false
@@ -147,40 +146,57 @@ function showGraph_operative(serial) {
                             onMouseover: function(e) {
                             }
                         },
-                            {
-                                id: 'a-line-2', // optional
-                                type: 'line',
-                                mode: 'vertical',
-                                scaleID: 'x-axis-0',
-                                value: data.first_occurrence,
-                                borderColor: '#FF0000',
-                                borderWidth: 1,
-                                label: {
-                                    position: "bottom",
-                                    yAdjust: 25,
-                                    enabled: true,
-                                    content: data.first_occurrence.substr(11)
-                                },
-                                onMouseover: function(e) {
-                                }
+                        {
+                            id: 'a-line-2', // optional
+                            type: 'line',
+                            mode: 'vertical',
+                            scaleID: 'x-axis-0',
+                            value: data.first_occurrence,
+                            borderColor: '#FF0000',
+                            borderWidth: 1,
+                            label: {
+                                position: "bottom",
+                                yAdjust: 25,
+                                enabled: true,
+                                content: data.first_occurrence.substr(11)
                             },
-                            {
-                                id: 'a-line-3', // optional
-                                type: 'line',
-                                mode: 'vertical',
-                                scaleID: 'x-axis-0',
-                                value: data.inc_create,
-                                borderColor: '#00b050',
-                                borderWidth: 1,
-                                label: {
-                                    position: "bottom",
-                                    yAdjust: 50,
-                                    enabled: true,
-                                    content: data.inc_create.substr(11)
-                                },
-                                onMouseover: function(e) {
-                                }
-                            }]
+                            onMouseover: function(e) {
+                            }
+                        },
+                        {
+                            id: 'a-line-3', // optional
+                            type: 'line',
+                            mode: 'vertical',
+                            scaleID: 'x-axis-0',
+                            value: data.inc_create,
+                            borderColor: '#00b050',
+                            borderWidth: 1,
+                            label: {
+                                position: "bottom",
+                                yAdjust: 50,
+                                enabled: data.inc_create.localeCompare('1970-01-01 03:00:00') > 0,
+                                content: data.inc_create.substr(11)
+                            },
+                            onMouseover: function(e) {
+                            }
+                        },
+                        {
+                            id: 'a-line-4', // optional
+                            type: 'line',
+                            mode: 'vertical',
+                            scaleID: 'x-axis-0',
+                            value: data.last_occurrence,
+                            borderColor: '#0000FF',
+                            borderWidth: 1,
+                            label: {
+                                position: "bottom",
+                                yAdjust: 75,
+                                enabled: true,
+                                content: data.last_occurrence.substr(11)
+                            },
+                            onMouseover: function(e) {
+                            }
+                        }]
                     }
                 },
             });

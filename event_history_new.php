@@ -129,7 +129,9 @@ echo "</table>";
 ?>
 
 <br><br>
-<canvas id="graph-operative"></canvas>
+<table style="width: 1000px; height:300px;">
+    <canvas id="graph-operative"></canvas>
+</table>
 
 <!-- pop-up help window -->
 <div class="overlay" title=""></div>
