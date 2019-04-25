@@ -52,7 +52,7 @@ db2_close($connection_WHFED);
 // if there is no such serial
 if (empty($history_arr)) {
     echo json_encode(array(
-        'error' => "Событие с серийным номером {$serial} не найдено!",
+        'error' => "Событие с серийным номером {$serial} не найдено.",
     ));
     exit();
 }
@@ -67,7 +67,7 @@ $severity = $history_arr[0]['SEVERITY'] == 5 ? 'Critical' : 'Warning';
 // if the situation is not eligible
 if (!array_key_exists($sit_code, $sits_arr)) {
     echo json_encode(array(
-        'error' => "Ситуация {$sit_code} не имеет метрики для построения графика!",
+        'error' => "Ситуация {$sit_code} не имеет метрики для построения графика или ещё не добавлена в коллекцию.",
     ));
     exit();
 }
@@ -85,7 +85,7 @@ $port_reg = 50000;
 $connection_reg = db2_connect("DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database_reg;HOSTNAME=$hostname_reg;PORT=$port_reg;PROTOCOL=TCPIP;UID=$user_reg;PWD=$password_reg;", '', '');
 if (!$connection_reg) {
     echo json_encode(array(
-        'error' => "Нет соединения с БД WH{$region}!",
+        'error' => "Нет соединения с БД WH{$region}.",
     ));
     exit();
 }
@@ -99,7 +99,7 @@ db2_close($connection_TBSM);
 
 if (empty($row)) {
     echo json_encode(array(
-        'error' => "Нет данных о частоте опроса ситуации {$sit_code}!",
+        'error' => "Нет данных о частоте опроса ситуации {$sit_code}.",
     ));
     exit();
 }
@@ -117,15 +117,6 @@ foreach (array_reverse($history_arr) as $v) {
     }
 }
 
-// chart range
-$start_sit = $first_occurrence - $frequency * $checks;
-$last_occurrence = max($last_occurrence, $close_sit);
-if ($scale == -1) {
-    $scale = ($last_occurrence - $start_sit > 3600*24) ? 0 : 3;
-}
-$start_graph = $start_sit - $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
-$end_graph = $last_occurrence + $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
-
 // get data about incident
 $inc_create = 0;
 foreach ($history_arr as $v) {
@@ -134,6 +125,15 @@ foreach ($history_arr as $v) {
         break;
     }
 }
+
+// chart range
+$start_sit = $first_occurrence - $frequency * $checks;
+$last_occurrence = max($last_occurrence, $close_sit, $inc_create);
+if ($scale == -1) {
+    $scale = ($last_occurrence - $start_sit > 3600*24) ? 0 : 3;
+}
+$start_graph = $start_sit - $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
+$end_graph = $last_occurrence + $scales_arr[$scale]['sec'] + $shift * $scales_arr[$scale]['sec']/2;
 
 // get metrics from WH
 $start_time_db2 = '1'.date('ymdHis', $start_graph);
@@ -157,7 +157,7 @@ db2_close($connection_reg);
 // if there is no data in WH
 if (empty($data)) {
     echo json_encode(array(
-        'error' => "Не найдено данных по узлу {$node_WH} за период ".date('d.m.Y', $start_graph)."-".date('d.m.Y', $end_graph)."!",
+        'error' => "Не найдено данных по узлу {$node_WH} за период ".date('d.m.Y', $start_graph)."-".date('d.m.Y', $end_graph),
     ));
     exit();
 }
