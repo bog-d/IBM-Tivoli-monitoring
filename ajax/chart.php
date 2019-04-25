@@ -22,8 +22,18 @@ $sits_arr = array(
         'metrica'   => "\"Disk_Used_Percent\"",
         'table'     => "\"KLZ_Disk\"",
         'object'    => "\"System_Name\"",
+        'replace'   => array("I:LZ" => "i:LZ"),
         'where'     => "and \"Mount_Point\" = '/'",
+        'title'     => "% использования диска",
         ),
+    'NT_DISK_SPACE_LOW'     => array(
+        'metrica'   => "\"%_Used\"",
+        'table'     => "\"NT_Logical_Disk\"",
+        'object'    => "\"Server_Name\"",
+        'replace'   => array("PRIMARY:" => "Primary:"),
+        'where'     => "and \"Disk_Name\" = '_Total'",
+        'title'     => "% использования диска",
+    ),
 );
 
 $data = [];
@@ -51,16 +61,8 @@ if (empty($history_arr)) {
 $first_occurrence = utime($history_arr[0]['FIRST_OCCURRENCE']);
 $last_occurrence = utime($history_arr[count($history_arr) - 1]['LAST_OCCURRENCE']);
 $sit_code = $history_arr[0]['PFR_SIT_NAME'];
-$node = strpos($history_arr[0]['NODE'], 'I:LZ') > 0 ? str_replace('I:LZ', 'i:LZ', $history_arr[0]['NODE']) : $history_arr[0]['NODE'];
 $region = $history_arr[0]['PFR_ID_TORG'] == '101' ? 'MSK' : $history_arr[0]['PFR_ID_TORG'];
 $severity = $history_arr[0]['SEVERITY'] == 5 ? 'Critical' : 'Warning';
-
-// get data about situation
-$select = "select distinct INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$history_arr[0]['PFR_ID_TORG']}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
-$stmt = db2_prepare($connection_TBSM, $select);
-$result = db2_execute($stmt);
-$row = db2_fetch_assoc($stmt);
-db2_close($connection_TBSM);
 
 // if the situation is not eligible
 if (!array_key_exists($sit_code, $sits_arr)) {
@@ -69,6 +71,10 @@ if (!array_key_exists($sit_code, $sits_arr)) {
     ));
     exit();
 }
+
+$node = $node_WH = $history_arr[0]['NODE'];
+foreach ($sits_arr[$sit_code]['replace'] as $search => $replace)
+    $node_WH = str_replace($search, $replace, $node_WH);
 
 // WH database connection options
 $database_reg = "WH{$region}";
@@ -84,6 +90,13 @@ if (!$connection_reg) {
     exit();
 }
 
+// get data about situation
+$select = "select distinct INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$history_arr[0]['PFR_ID_TORG']}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
+$stmt = db2_prepare($connection_TBSM, $select);
+$result = db2_execute($stmt);
+$row = db2_fetch_assoc($stmt);
+db2_close($connection_TBSM);
+
 if (empty($row)) {
     echo json_encode(array(
         'error' => "Нет данных о частоте опроса ситуации {$sit_code}!",
@@ -95,8 +108,18 @@ else {
     $checks = $row['COUNT'];
 }
 
+// get data about situation close
+$close_sit = 0;
+foreach (array_reverse($history_arr) as $v) {
+    if ($v['SEVERITY'] == 0) {
+        $close_sit = utime($v['WRITETIME']);
+        break;
+    }
+}
+
 // chart range
 $start_sit = $first_occurrence - $frequency * $checks;
+$last_occurrence = max($last_occurrence, $close_sit);
 if ($scale == -1) {
     $scale = ($last_occurrence - $start_sit > 3600*24) ? 0 : 3;
 }
@@ -117,7 +140,7 @@ $start_time_db2 = '1'.date('ymdHis', $start_graph);
 $end_time_db2 = '1'.date('ymdHis', $end_graph);
 $select_wh = "select \"Timestamp\" as T, {$sits_arr[$sit_code]['metrica']} as VALUE
                 from U{$region}.{$sits_arr[$sit_code]['table']}
-                where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and {$sits_arr[$sit_code]['object']} = '{$node}' {$sits_arr[$sit_code]['where']}
+                where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and {$sits_arr[$sit_code]['object']} = '{$node_WH}' {$sits_arr[$sit_code]['where']}
                 order by \"Timestamp\" asc";
 $stmt_wh = db2_prepare($connection_reg, $select_wh);
 $result_wh = db2_execute($stmt_wh);
@@ -134,13 +157,14 @@ db2_close($connection_reg);
 // if there is no data in WH
 if (empty($data)) {
     echo json_encode(array(
-        'error' => "Не найдено данных по узлу {$node} за период ".date('d.m.Y', $start_graph)."-".date('d.m.Y', $end_graph)."!",
+        'error' => "Не найдено данных по узлу {$node_WH} за период ".date('d.m.Y', $start_graph)."-".date('d.m.Y', $end_graph)."!",
     ));
     exit();
 }
 
 // ajax return
 echo json_encode(array(
+    'title'             => $sits_arr[$sit_code]['title'],
     'scale'             => $scale,
     'axes'              => $scales_arr[$scale]['axes'],
     'step'              => $scales_arr[$scale]['step'],
@@ -148,7 +172,7 @@ echo json_encode(array(
     'start_sit'         => date('Y-m-d H:i:s', $start_sit),
     'first_occurrence'  => date('Y-m-d H:i:s', $first_occurrence),
     'inc_create'        => date('Y-m-d H:i:s', $inc_create),
-    'last_occurrence'   => date('Y-m-d H:i:s', $last_occurrence),
+    'close_sit'         => date('Y-m-d H:i:s', $close_sit),
     'error'             => '',
 ));
 exit();

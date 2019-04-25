@@ -129,8 +129,70 @@ echo "</table>";
 ?>
 
 <br><br>
-<table style="width: 1000px; height:300px;">
-    <canvas id="graph-operative"></canvas>
+<table style="width: 1800px;">
+<!--    <caption>График метрики мониторинга с отметками по сработавшей ситуации</caption>-->
+    <tr>
+        <td>
+            <canvas id="graph-operative"></canvas>
+        </td>
+        <td valign="center">
+            <table class="ael_hide" cellpadding="10">
+                <tr>
+                    <td style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #FF0000; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #54C1F0; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #00b050; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td></td>
+                    <th colspan="2" id="serial"></th>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #FF0000; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #54C1F0; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #00b050; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td align="right">--></td>
+                    <td>Закрытие ситуации:</td>
+                    <td id="close_sit"></td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #FF0000; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #54C1F0; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td colspan="2" align="right">------></td>
+                    <td>Создание инцидента:</td>
+                    <td id="inc_create"></td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td style="border: 2px solid; border-right-color: #FF0000; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td colspan="3" align="right">-------></td>
+                    <td>Срабатывание ситуации:</td>
+                    <td id="first_occurrence"></td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
+                    <td colspan="4" align="right">-----------></td>
+                    <td>Горизонт события:</td>
+                    <td id="start_sit"></td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="0">
+                        Масштаб
+                        <br><br>
+                        <button id="scale_plus" title="Увеличить масштаб..."><b>&nbsp;<font size="+1>">+</font>&nbsp;</b></button>&emsp;
+                        <button id="scale_minus" title="Уменьшить масштаб..."><b>&nbsp;<font size="+1>">-</font>&nbsp;</b></button>
+                        <br><br>
+                        История
+                        <br><br>
+                        <button id="prev" title="Назад, в прошлое..."><b>&nbsp;<font size="+1>"><</font>&nbsp;</b></button>&emsp;
+                        <button id="next" title="Вперёд, в будущее..."><b>&nbsp;<font size="+1>">></font>&nbsp;</b></button>
+                        <br><br><br><br>
+                        <button id="close" title="Убрать график">Закрыть</button>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
 </table>
 
 <!-- pop-up help window -->
