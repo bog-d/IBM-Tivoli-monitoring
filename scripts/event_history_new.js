@@ -9,6 +9,9 @@ $(document).ready(function() {
         order: [[ 1, 'desc' ]],
         colReorder: true,
         pageLength: 10,
+        // scrollY: '60vh',
+        // scrollCollapse: true,
+        // scrollX: true,
         columns: [
             { data:           null,
                 className:      'details-control',
@@ -149,7 +152,7 @@ $(document).ready(function() {
             'colvis', 'copy', 'excel', 'print'
         ],
         language: {
-            "processing": "Пожалуйста, подождите...",
+            "processing": "<font color='red'>Пожалуйста, подождите...</font><img src='images/inprogress.gif' hspace='10'>",
             "search": "Поиск в пределах подсистемы:",
             "lengthMenu": "Показать _MENU_ записей",
             "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
@@ -219,6 +222,22 @@ $(document).ready(function() {
             row.child( format(row.data()) ).show();
             tr.addClass('shown');
         }
+    } );
+
+    // Add event listener for toggle all details
+    $('img#details').on( 'click', function () {
+        table.rows().each(function () {
+            $('.details-control').trigger( 'click' );
+
+            if ($('img#details').attr('src') == 'images/details_close.png') {
+                $('img#details').attr('src', 'images/details_open.png');
+                $('img#details').attr('title', 'Развернуть все детали');
+            }
+            else {
+                $('img#details').attr('src', 'images/details_close.png');
+                $('img#details').attr('title', 'Свернуть все детали');
+            }
+        } );
     } );
 
     function format ( d ) {

@@ -38,7 +38,7 @@ header('Content-Type: text/html;charset=UTF-8');
 <body>
 <?php
 $captions = array (
-    "" => '',
+    "" => 'png',
     "Время записи" => 'input*2',
     "Номер" => 'input',
     "Отделение" => 'input',
@@ -55,7 +55,7 @@ $captions = array (
     "Номер РЗ" => '',
 );
 
-echo "<table width='100%' border='0' cellspacing='0' cellpadding='10' class='page_title'>";
+echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page_title'>";
     echo "<tr>";
         echo "<td width='20%' align='left' rowspan='0' class='page_title_dark'>";
         echo "</td>";
@@ -74,6 +74,7 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='10' class='pag
     echo "<tr>";
         echo "<td align='center'>";
             echo "за 2019 год";
+            echo "<br><br><div id='wait'></div>";
         echo "</td>";
     echo "</tr>";
     echo "<tr>";
@@ -107,6 +108,9 @@ echo "<table id='events' class='display compact hover' width='100%'>";
                         break;
                 }
                 switch ($type) {
+                    case 'png':
+                        echo "<th><img src='images/details_open.png' id='details' title='Развернуть все детали' style='margin-left: 10px;'></th>";
+                        break;
                     case 'input':
                         echo "<th><input type='text' placeholder='Поиск...' value='{$value}' /></th>";
                         break;
@@ -128,7 +132,6 @@ echo "</table>";
 
 ?>
 
-<br><br>
 <table style="width: 1800px;">
 <!--    <caption>График метрики мониторинга с отметками по сработавшей ситуации</caption>-->
     <tr>

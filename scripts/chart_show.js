@@ -50,6 +50,7 @@ $(function() {
 
 
 function showGraph_operative(serial) {
+    $('div#wait').html("<font color='red'>Пожалуйста, подождите...</font><img src='images/inprogress.gif' hspace='10'>");
     if (typeof lineGraph !== 'undefined') {
         lineGraph.destroy();
     }
@@ -65,6 +66,7 @@ function showGraph_operative(serial) {
         data: {'scale':$scale, 'shift':$time_shift, 'serial':serial},
         dataType: 'json',
         success: function (data) {
+            $("div#wait").empty();
             if (data.error.length > 0) {
                 alert(data.error);
                 return;
@@ -223,6 +225,9 @@ function showGraph_operative(serial) {
                     }
                 },
             });
+        },
+        error: function() {
+            $("div#wait").empty();
         }
     });
 }
