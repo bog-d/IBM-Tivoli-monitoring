@@ -207,6 +207,8 @@ echo json_encode(array(
     'first_occurrence'  => date('Y-m-d H:i:s', $first_occurrence),
     'inc_create'        => date('Y-m-d H:i:s', $inc_create),
     'close_sit'         => date('Y-m-d H:i:s', $close_sit),
+    'frequency'         => readable_time($frequency, true),
+    'checks'            => $checks,
     'error'             => '',
 ));
 exit();

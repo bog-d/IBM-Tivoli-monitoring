@@ -30,11 +30,6 @@ $(document).ready(function() {
             },
             { data: "SERIAL",
                 className: 'dt-body-center',
-                render: function ( data, type, row ) {
-                    return type === "display" ?
-                        '<a href=\'#\' title=\'Показать график...\' onclick="showGraph_operative(' + data + '); return false;">' + data + '</a>' :
-                        data;
-                },
                 orderable: false
             },
             { data: "PFR_TORG",
@@ -56,6 +51,11 @@ $(document).ready(function() {
                 orderable: false
             },
             { data: "PFR_SIT_NAME",
+                render: function ( data, type, row ) {
+                    return type === "display" ?
+                        data + '<a id="cell_pfr_sit_name" href=\'#\' title=\'Показать график...\'><img src="images/chart.png" align="bottom" hspace="10" width="16" height="16"></a>' :
+                        data;
+                },
                 orderable: false
             },
 /*
@@ -96,10 +96,19 @@ $(document).ready(function() {
                 orderable: false
             },
             { data: "PFR_TSRM_WORDER",
+                render: function ( data, type, row ) {
+                    return type === "display" ?
+                        '<a href=\'http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=:' + data +
+                            '&amp;forcereload=true\' target=\'blank\' title=\'Перейти в СТП к РЗ...\'>' + data + '</a>' :
+                        data;
+                },
+                className: 'dt-body-center',
                 orderable: false
             }
         ],
         fnRowCallback: function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+            $('a#cell_pfr_sit_name', nRow).attr('onclick', 'showGraph_operative(' + aData['SERIAL'] + '); return false;');
+
             switch (aData["SEVERITY"]) {
                 case "Critical":
                     $('td.cell_severity', nRow).attr('class', 'red_status dt-body-center'); break;
@@ -246,7 +255,7 @@ $(document).ready(function() {
                     '<td>Описание ситуации:</td>'+
                     '<td>'+
                         d.DESCRIPTION +
-                        '&emsp;&emsp;<input type="button" onclick="showGraph_operative(' + d.SERIAL + ')" title="Показать график..." value="Хронология">' +
+                        // '&emsp;&emsp;<input type="button" onclick="showGraph_operative(' + d.SERIAL + ')" title="Показать график..." value="Хронология">' +
                     '</td>'+
             '</tr>'+
                 '<tr>'+

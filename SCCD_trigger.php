@@ -1793,7 +1793,11 @@ header('Content-Type: text/html;charset=UTF-8');
                         echo "<td align='center'><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
                         break;
                     case 'pfr_tsrm_worder':
-                        echo "<td align='center'>".str_replace(';', '<br>', $value)."</td>";
+                        echo "<td align='center'>";
+                            $worder_arr = array_filter(explode(';',$value));
+                            foreach ($worder_arr as $worder)
+                                echo "<a href='http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=:{$worder}&amp;forcereload=true' target='_blank' title='Переход в СТП к РЗ'>{$worder}</a><br>";
+                        echo "</td>";
                         break;
                     case 'pfr_tsrm_worder_delay':
                         echo "<td align='right'>$value</td>";

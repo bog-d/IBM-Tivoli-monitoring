@@ -45,7 +45,7 @@ $captions = array (
     "Узел" => 'input',
     "Объект" => 'input',
     "КЭ" => 'input',
-    "Код события в ТОРС" => 'input',
+    "Код события в ТОРС / график события" => 'input',
 //    "Описание" => '',
     "Критичность" => 'select',
     "Номер инцидента" => 'input',
@@ -167,6 +167,16 @@ echo "</table>";
                     <td colspan="4" align="right">-----------------></td>
                     <td>Горизонт события:</td>
                     <td id="start_sit"></td>
+                </tr>
+                <tr>
+                    <td colspan="5"></td>
+                    <td>Частота опроса:</td>
+                    <td id="frequency"></td>
+                </tr>
+                <tr>
+                    <td colspan="5"></td>
+                    <td>Кол-во последовательных проверок:</td>
+                    <td id="checks"></td>
                 </tr>
                 <tr>
                     <td align="center" colspan="7">
