@@ -131,14 +131,14 @@ echo "<table id='events' class='display compact hover' width='100%'>";
 echo "</table>";
 
 ?>
-
-<table style="width: 1800px;">
+<br/><br/>
+<table align="center" style="width: 1800px;">
 <!--    <caption>График метрики мониторинга с отметками по сработавшей ситуации</caption>-->
     <tr>
-        <td>
+        <td rowspan="2">
             <canvas id="graph-operative"></canvas>
         </td>
-        <td valign="center">
+        <td>
             <table class="ael_hide" cellpadding="10">
                 <tr>
                     <td rowspan="5" style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
@@ -178,21 +178,25 @@ echo "</table>";
                     <td>Кол-во последовательных проверок:</td>
                     <td id="checks"></td>
                 </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <table class="ael_hide gantt" cellpadding="10">
                 <tr>
-                    <td align="center" colspan="7">
-                        <br><br>
-                        Масштаб
-                        <br><br>
-                        <button id="scale_plus" title="Увеличить масштаб..."><b>&nbsp;<font size="+1>">+</font>&nbsp;</b></button>&emsp;
-                        <button id="scale_minus" title="Уменьшить масштаб..."><b>&nbsp;<font size="+1>">-</font>&nbsp;</b></button>
-                        <br><br>
-                        История
-                        <br><br>
+                    <th>Управление графиком</th>
+                </tr>
+                <tr>
+                    <td align="center">
                         <button id="prev" title="Назад, в прошлое..."><b>&nbsp;<font size="+1>"><</font>&nbsp;</b></button>&emsp;
+                        <button id="scale_plus" title="Увеличить масштаб..."><b>&nbsp;<font size="+1>">+</font>&nbsp;</b></button>&emsp;
+                        <button id="scale_minus" title="Уменьшить масштаб..."><b>&nbsp;<font size="+1>">-</font>&nbsp;</b></button>&emsp;
                         <button id="next" title="Вперёд, в будущее..."><b>&nbsp;<font size="+1>">></font>&nbsp;</b></button>
-                        <br><br><br><br>
-                        <button id="close" title="Убрать график">Закрыть</button>
                     </td>
+                </tr>
+                <tr>
+                    <td align="center"><button id="close" title="Убрать график">Закрыть</button></td>
                 </tr>
             </table>
         </td>

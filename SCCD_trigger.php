@@ -875,7 +875,7 @@ header('Content-Type: text/html;charset=UTF-8');
         }
 
         $form_descr_arr_unique = array_unique($form_descr_arr);
-        unset($form_descr_arr);
+        $form_descr_arr = [];
 
         // get formula description from SCCD
         $sel = "SELECT CODSIT, NAME, FORMULADESC FROM MAXIMO.TEMPCI WHERE NAME in ('".implode("', '", $form_descr_arr_unique)."')";
