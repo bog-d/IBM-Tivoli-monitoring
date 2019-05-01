@@ -30,13 +30,11 @@ $(document).ready(function() {
             },
             { data: "SERIAL",
                 className: 'dt-body-center',
-/*
                 render: function ( data, type, row ) {
                     return type === "display" ?
-                        data + '<a href="#" id="ser_filt"><img src="images/filter.png" title="Фильтр по номеру события" hspace="10" align="top"></a>' :
+                        data + '<img class="click" id="serial" src="images/filter.png" title="Установить/снять фильтр по номеру события" hspace="10" align="top">' :
                         data;
                 },
-*/
                 orderable: false
             },
             { data: "PFR_TORG",
@@ -60,17 +58,11 @@ $(document).ready(function() {
             { data: "PFR_SIT_NAME",
                 render: function ( data, type, row ) {
                     return type === "display" ?
-                        '<table width="100%"><tr><td>' + data + '</td>' + '<td id="chart" align="right"></td></tr></table>' :
+                        '<table width="100%" style="background:transparent"><tr><td>' + data + '</td>' + '<td id="chart" align="right"></td></tr></table>' :
                         data;
                 },
                 orderable: false
             },
-/*
-            { data: "DESCRIPTION",
-                width: "20%",
-                orderable: false
-            },
-*/
             { data: "SEVERITY",
                 className: 'cell_severity',
                 orderable: false
@@ -118,26 +110,10 @@ $(document).ready(function() {
                 if (aData['SIT_IN_COLLECTION'])
                     $('td#chart', nRow).html('<a id="cell_pfr_sit_name" href=\'#\'><img src="images/chart.png" align="top" hspace="10" width="24" height="24" title="Показать график..."></a>');
                 else
-                    $('td#chart', nRow).html('<img src="images/chart_inactive.png" align="top" hspace="10" width="24" height="24" title="График временно недоступен">');
+                    $('td#chart', nRow).html('<img src="images/chart_inactive.png" align="top" hspace="10" width="24" height="24" title="График будет в перспективе...">');
             }
 
             $('a#cell_pfr_sit_name', nRow).attr('onclick', 'showGraph_operative(' + aData['SERIAL'] + '); return false;');
-
-/*
-            $('a#ser_filt', nRow).attr('onclick', 'serialFilter(' + aData['SERIAL'] + '); return false;');
-
-            $('img.ser_filt').click (function () {
-                var column = table.column(2);
-                console.log('8888');
-                var serial = $(this).attr('id').substring(3);
-
-                var input = $('input', column.footer());
-                input.val(serial);
-                column
-                    .search(serial)
-                    .draw();
-            } );
-*/
 
             switch (aData["SEVERITY"]) {
                 case "Critical":
@@ -238,15 +214,20 @@ $(document).ready(function() {
         } );
     } );
 
-/*
-    $('#events tbody')
-        .on( 'mouseenter', 'td', function () {
-            var colIdx = table.cell(this).index().column;
+    $('#events tbody').on('click', '#serial', function () {
+        var td = $(this).closest('td');
+        var cell = table.cell( td );
+        var serial = cell.data();
 
-            $( table.cells().nodes() ).removeClass( 'highlight' );
-            $( table.column( colIdx ).nodes() ).addClass( 'highlight' );
-        } );
-*/
+        var column = table.column(2);
+        var input = $('input', column.footer());
+        var search = input.val() == serial ? '' : serial;
+
+        input.val(search);
+        column
+            .search(search)
+            .draw();
+    } );
 
     // Add event listener for opening and closing details
     $('#events tbody').on('click', 'td.details-control', function () {
