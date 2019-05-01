@@ -20,7 +20,8 @@ $fields = array (
 if (!empty($_POST)) {
     require_once '../connections/TBSM.php';
     require_once '../connections/WHFED.php';
-    include '../functions/tbsm.php';
+    require_once '../functions/tbsm.php';
+    require_once 'chart_sit_collections.php';
 
     $recordsTotal = 0;
     $recordsFiltered = 0;
@@ -112,6 +113,10 @@ if (!empty($_POST)) {
     $result_WHFED = db2_execute($stmt_WHFED);
 
     while ($row = db2_fetch_assoc($stmt_WHFED)) {
+        $sql_sit = "select * from DB2INST1.PFR_TEMS_SIT_AGGR where SIT_CODE = '{$row['PFR_SIT_NAME']}' and INTERVAL = '000000'";
+        $stmt_TBSM = db2_prepare($connection_TBSM, $sql_sit);
+        $result_TBSM = db2_execute($stmt_TBSM);
+
         $data_arr[] = array(
             "DT_RowId" => "row_{$row['ID']}",
             "WRITETIME" => substr($row['WRITETIME'], 0, 19),
@@ -128,9 +133,12 @@ if (!empty($_POST)) {
             "CLASSIFICATIONID" => $row['CLASSIFICATIONID'],
             "CLASSIFICATIONGROUP" => $row['CLASSIFICATIONGROUP'],
             "PFR_TSRM_WORDER" => $row['PFR_TSRM_WORDER'],
+            "SAMPLED_SIT" => $row['PFR_SIT_NAME'] == 'OFFLINE' ? false : empty(db2_fetch_assoc($stmt_TBSM)),
+            "SIT_IN_COLLECTION" => array_key_exists($row['PFR_SIT_NAME'], $sits_arr),
         );
     }
     db2_close($connection_WHFED);
+    db2_close($connection_TBSM);
 
     $json_arr = array(
         "draw" => $draw,

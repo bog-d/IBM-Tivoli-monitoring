@@ -1,8 +1,3 @@
-var valid_sit = [
-    'LZ_CPU_LOAD_HIGH', 'LZ_DISK_SPACE_LOW', 'LZ_MEMORY_LOW',
-    'NT_CPU_LOAD_HIGH', 'NT_DISK_SPACE_LOW', 'NT_MEMORY_LOW',
-];
-
 $(document).ready(function() {
     var table = $('#events').DataTable( {
         ajax: {
@@ -64,11 +59,8 @@ $(document).ready(function() {
             },
             { data: "PFR_SIT_NAME",
                 render: function ( data, type, row ) {
-                    var image = valid_sit.indexOf(data) == -1 ?
-                        '<img src="images/chart_inactive.png" align="top" hspace="10" width="24" height="24">' :
-                        '<a id="cell_pfr_sit_name" href=\'#\' title=\'Показать график...\'><img src="images/chart.png" align="top" hspace="10" width="24" height="24"></a>';
                     return type === "display" ?
-                        '<table width="100%"><tr><td>' + data + '</td>' + '<td align="right">' + image + '</td></tr></table>' :
+                        '<table width="100%"><tr><td>' + data + '</td>' + '<td id="chart" align="right"></td></tr></table>' :
                         data;
                 },
                 orderable: false
@@ -122,6 +114,13 @@ $(document).ready(function() {
             }
         ],
         fnRowCallback: function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+            if (aData['SAMPLED_SIT']) {
+                if (aData['SIT_IN_COLLECTION'])
+                    $('td#chart', nRow).html('<a id="cell_pfr_sit_name" href=\'#\'><img src="images/chart.png" align="top" hspace="10" width="24" height="24" title="Показать график..."></a>');
+                else
+                    $('td#chart', nRow).html('<img src="images/chart_inactive.png" align="top" hspace="10" width="24" height="24" title="График временно недоступен">');
+            }
+
             $('a#cell_pfr_sit_name', nRow).attr('onclick', 'showGraph_operative(' + aData['SERIAL'] + '); return false;');
 
 /*

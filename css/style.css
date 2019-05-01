@@ -176,7 +176,7 @@ h4.not_loc_show, h4.not_sit_show, h4.not_ke_show {
 tr.rec_hide {
 	display: none;
 }
-h4.tr_rec_toggle {
+h4.tr_rec_toggle, img.click {
 	cursor: pointer;
 	color: #0000FF;
 }

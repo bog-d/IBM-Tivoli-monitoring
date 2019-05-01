@@ -8,6 +8,7 @@ require_once('../connections/WHFED.php');
 require_once('../connections/TBSM.php');
 require_once('../functions/utime.php');
 require_once('../functions/tbsm.php');
+require_once('chart_sit_collections.php');
 
 $scales_arr = array(
     5 => array('sec' => 300,        'axes' => 'second',     'step' => 15),      // 5 min
@@ -16,57 +17,6 @@ $scales_arr = array(
     2 => array('sec' => 3600*6,     'axes' => 'minute',     'step' => 30),      // 6 hours
     1 => array('sec' => 3600*12,    'axes' => 'hour',       'step' => 1),       // 12 hours
     0 => array('sec' => 3600*24,    'axes' => 'hour',       'step' => 2),       // 1 day
-);
-
-$sits_arr = array(
-    'LZ_CPU_LOAD_HIGH'     => array(
-        'metrica'   => "\"Busy_CPU\"",
-        'table'     => "\"KLZ_CPU\"",
-        'object'    => "\"System_Name\"",
-        'replace'   => array("I:LZ" => "i:LZ"),
-        'where'     => "and \"CPU_ID\" = -1",
-        'title'     => "% загрузки процессора",
-        ),
-    'LZ_DISK_SPACE_LOW'     => array(
-        'metrica'   => "\"Disk_Used_Percent\"",
-        'table'     => "\"KLZ_Disk\"",
-        'object'    => "\"System_Name\"",
-        'replace'   => array("I:LZ" => "i:LZ"),
-        'where'     => "and \"Mount_Point\" = '/'",
-        'title'     => "% использования диска",
-    ),
-    'LZ_MEMORY_LOW'     => array(
-        'metrica'   => "\"Net_Memory_Used_Pct\"",
-        'table'     => "\"KLZ_VM_Stats\"",
-        'object'    => "\"System_Name\"",
-        'replace'   => array("I:LZ" => "i:LZ"),
-        'where'     => "",
-        'title'     => "% использования памяти",
-    ),
-    'NT_CPU_LOAD_HIGH'     => array(
-        'metrica'   => "\"%_Processor_Time\"",
-        'table'     => "\"NT_Processor\"",
-        'object'    => "\"Server_Name\"",
-        'replace'   => array("PRIMARY:" => "Primary:"),
-        'where'     => "and \"Processor\" = '_Total'",
-        'title'     => "% загрузки процессора",
-    ),
-    'NT_DISK_SPACE_LOW'     => array(
-        'metrica'   => "\"%_Used\"",
-        'table'     => "\"NT_Logical_Disk\"",
-        'object'    => "\"Server_Name\"",
-        'replace'   => array("PRIMARY:" => "Primary:"),
-        'where'     => "and \"Disk_Name\" = '_Total'",
-        'title'     => "% использования диска",
-    ),
-    'NT_MEMORY_LOW'     => array(
-        'metrica'   => "\"Memory_Usage_Percentage\"",
-        'table'     => "\"NT_Memory_64\"",
-        'object'    => "\"Server_Name\"",
-        'replace'   => array("PRIMARY:" => "Primary:"),
-        'where'     => "",
-        'title'     => "% использования памяти",
-    ),
 );
 
 $data = [];
