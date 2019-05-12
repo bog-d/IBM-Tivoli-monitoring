@@ -40,6 +40,16 @@ $sits_arr = array(
         'where'     => "and \"Disk_Name\" = '_Total'",
         'title'     => "% использования диска",
     ),
+    'NT_DISK_RW'     => array(
+        'metrica'   => "\"%_Disk_Read_Time\"",
+        'metrica2'  => "\"%_Disk_Write_Time\"",
+        'table'     => "\"NT_Logical_Disk\"",
+        'object'    => "\"Server_Name\"",
+        'replace'   => array("PRIMARY:" => "Primary:"),
+        'where'     => "and \"Disk_Name\" = '_Total'",
+        'title'     => "% времени на обработку запросов на чтение",
+        'title2'    => "% времени на обработку запросов на запись",
+    ),
     'NT_MEMORY_LOW'     => array(
         'metrica'   => "\"Memory_Usage_Percentage\"",
         'table'     => "\"NT_Memory_64\"",

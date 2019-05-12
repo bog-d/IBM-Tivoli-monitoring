@@ -85,22 +85,34 @@ function showGraph_operative(serial) {
 
             var time = [];
             var metrics = [];
+            var metrics2 = [];
 
             for (var i in data.metrics) {
                 time.push(data.metrics[i].time);
                 metrics.push(data.metrics[i].value);
+                metrics2.push(data.metrics[i].value2);
             }
 
             var chartdata = {
                 labels: time,
                 datasets: [
                     {
-                        label: 'Значение метрики',
+                        label: data.title,
                         borderColor: '#0000FF',
                         fill: false,
                         hoverBackgroundColor: '#CFCFCF',
                         hoverBorderColor: '#666666',
-                        data: metrics
+                        data: metrics,
+                        yAxisID: 'y-axis-1'
+                    },
+                    {
+                        label: data.title2,
+                        borderColor: '#660010',
+                        fill: false,
+                        hoverBackgroundColor: '#CFCFCF',
+                        hoverBorderColor: '#666666',
+                        data: metrics2,
+                        yAxisID: 'y-axis-2'
                     },
                 ]
             };
@@ -117,7 +129,8 @@ function showGraph_operative(serial) {
                         // text: 'График по выбранной метрике мониторинга'
                     },
                     legend: {
-                        display: false
+                        display: data.title2 == null ? false : true,
+                        position: 'top'
                     },
                     scales: {
                         xAxes: [{
@@ -146,8 +159,23 @@ function showGraph_operative(serial) {
                             scaleLabel: {
                                 display: true,
                                 labelString: data.title,
-                            }
-                        }]
+                            },
+                            position: 'left',
+                            id: 'y-axis-1',
+                        },{
+                            ticks: {
+                                min: 0,
+                                max: 100,
+                                stepSize: 10
+                            },
+                            scaleLabel: {
+                                display: data.title2 == null ? false : true,
+                                labelString: data.title2,
+                            },
+                            position: 'right',
+                            id: 'y-axis-2',
+                        }
+                        ]
                     },
                     elements: {
                         line: {

@@ -6,6 +6,7 @@ $(document).ready(function() {
         },
         processing: true,
         serverSide: true,
+        deferRender: true,
         order: [[ 1, 'desc' ]],
         colReorder: true,
         pageLength: 10,

@@ -122,7 +122,7 @@ $end_graph = $last_occurrence + $scales_arr[$scale]['sec'] + $shift * $scales_ar
 // get metrics from WH
 $start_time_db2 = '1'.date('ymdHis', $start_graph);
 $end_time_db2 = '1'.date('ymdHis', $end_graph);
-$select_wh = "select \"Timestamp\" as T, {$sits_arr[$sit_code]['metrica']} as VALUE
+$select_wh = "select \"Timestamp\" as T, {$sits_arr[$sit_code]['metrica']} as VALUE".(isset($sits_arr[$sit_code]['metrica2']) ? ", {$sits_arr[$sit_code]['metrica2']} as VALUE2" : "")."
                 from U{$region_wh}.{$sits_arr[$sit_code]['table']}
                 where \"Timestamp\" >= '{$start_time_db2}' and \"Timestamp\" < '{$end_time_db2}' and {$sits_arr[$sit_code]['object']} = '{$node_WH}' {$sits_arr[$sit_code]['where']}
                 order by \"Timestamp\" asc";
@@ -134,6 +134,7 @@ while ($row_wh = db2_fetch_assoc($stmt_wh)) {
         'time' => '20' . substr($row_wh['T'], 1, 2) . '-' . substr($row_wh['T'], 3, 2) . '-' . substr($row_wh['T'], 5, 2) . ' ' .
             substr($row_wh['T'], 7, 2) . ':' . substr($row_wh['T'], 9, 2) . ':' . substr($row_wh['T'], 11, 2),
         'value' => $row_wh['VALUE'],
+        'value2' => isset($row_wh['VALUE2']) ? $row_wh['VALUE2'] : null,
     );
 }
 db2_close($connection_reg);
@@ -149,6 +150,7 @@ if (empty($data)) {
 // ajax return
 echo json_encode(array(
     'title'             => $sits_arr[$sit_code]['title'],
+    'title2'            => isset($sits_arr[$sit_code]['title2']) ? $sits_arr[$sit_code]['title2'] : null,
     'scale'             => $scale,
     'axes'              => $scales_arr[$scale]['axes'],
     'step'              => $scales_arr[$scale]['step'],

@@ -203,6 +203,7 @@ $AEL_col_list_arr = array(
     'Назначение' => 'pfr_nazn',
     'КЭ' => 'pfr_ke_tors',
     'Подкатегория' => 'pfr_subcategory',
+    'Идентификатор' => 'AlertKey',
     'Код проблемы' => 'pfr_sit_name',
     'Описание' => 'pfr_description',
     'Инцидент' => 'TTNumber',

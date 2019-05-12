@@ -135,7 +135,7 @@ echo "</table>";
 
 ?>
 <br/><br/>
-<table align="center" style="width: 1800px;">
+<table align="center" style="width: 100%;">
 <!--    <caption>График метрики мониторинга с отметками по сработавшей ситуации</caption>-->
     <tr>
         <td rowspan="2">
