@@ -10,6 +10,7 @@ $(document).ready(function() {
         order: [[ 1, 'desc' ]],
         colReorder: true,
         pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Все"]],
         // scrollY: '60vh',
         // scrollCollapse: true,
         // scrollX: true,
