@@ -46,13 +46,21 @@ $(document).ready(function() {
                 orderable: false
             },
             { data: "PFR_OBJECT",
+                render: function ( data, type, row ) {
+                    return type === "display" ?
+                        data + '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + data + '" target="_blank"' +
+                        'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
+                        data;
+                },
                 orderable: false
             },
             { data: "PFR_KE_TORS",
                 render: function ( data, type, row ) {
                     return type === "display" ?
                         '<a href=\'http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=' + data + '\' ' +
-                        'target=\'blank\' title=\'Перейти в СТП к КЭ...\'>' + data + '</a>' :
+                        'target=\'blank\' title=\'Перейти в СТП к КЭ...\'>' + data + '</a>' +
+                        '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + data + '" target="_blank"' +
+                        'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
                         data;
                 },
                 orderable: false
@@ -199,7 +207,11 @@ $(document).ready(function() {
 
         if ($('input', this.footer()).val()) {
             if ($('input', this.footer()).val().length > 0) {
-                this.search('^' + $('input', this.footer()).val());
+                var att = $('input', this.footer()).attr('id');
+                if (typeof att !== typeof undefined && att !== false && att == 'ptk')
+                    table.search($('input', this.footer()).val());
+                else
+                    this.search('^' + $('input', this.footer()).val());
                 this.draw();
             }
         }

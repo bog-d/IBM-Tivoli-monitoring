@@ -87,13 +87,16 @@ echo "<table id='events' class='display compact hover' width='100%'>";
     echo "<thead>";
         echo "<tr>";
             foreach ($captions as $key => $type)
-                echo "<th>".(empty($key) ? "<input type='text' value='".(isset($_GET["PTK"]) ? $_GET["PTK"] : "")."' hidden />" : "{$key}")."</th>";
+                echo "<th>{$key}</th>";
         echo "</tr>";
     echo "</thead>";
     echo "<tfoot>";
         echo "<tr>";
             foreach ($captions as $key => $type) {
                 switch ($key) {
+                    case '':
+                        $value = isset($_GET["PTK"]) ? $_GET["PTK"] : "";
+                        break;
                     case 'Номер':
                         $value = isset($_GET["Serial"]) ? $_GET["Serial"] : "";
                         break;
@@ -112,7 +115,8 @@ echo "<table id='events' class='display compact hover' width='100%'>";
                 }
                 switch ($type) {
                     case 'png':
-                        echo "<th><img class='click' src='images/details_open.png' id='details' title='Развернуть все детали' style='margin-left: 10px;'></th>";
+                        echo "<th><img class='click' src='images/details_open.png' id='details' title='Развернуть все детали' style='margin-left: 10px;'>
+                                <input type='text' id='ptk' value='{$value}' hidden /></th>";
                         break;
                     case 'input':
                         echo "<th><input type='text' placeholder='Поиск...' value='{$value}' /></th>";
