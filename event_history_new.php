@@ -52,7 +52,7 @@ $captions = array (
     "Класс" => 'select',
     "Номер класс." => '',
     "Группа класс." => '',
-    "Номер РЗ" => '',
+    "Номер РЗ" => 'input',
 );
 
 echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page_title'>";
@@ -64,7 +64,6 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page
         echo "</td>";
         echo "<td width='25%' align='right' rowspan='0'>";
             $param = (isset($_GET["ServiceName"]) ? "ServiceName={$_GET["ServiceName"]}&" : "") .
-                     (isset($_GET["PTK"]) ? "ServiceName={$_GET["PTK"]}&" : "") .
                      (isset($_GET["KE_OBJECT"]) ? "KE_OBJECT={$_GET["KE_OBJECT"]}&" : "") .
                      (isset($_GET["INCIDENT"]) ? "INCIDENT={$_GET["INCIDENT"]}&" : "");
             echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br><br>";
@@ -95,13 +94,10 @@ echo "<table id='events' class='display compact hover' width='100%'>";
             foreach ($captions as $key => $type) {
                 switch ($key) {
                     case '':
-                        $value = isset($_GET["PTK"]) ? $_GET["PTK"] : "";
+                        $value = isset($_GET["ServiceName"]) ? $_GET["ServiceName"] : "";
                         break;
                     case 'Номер':
                         $value = isset($_GET["Serial"]) ? $_GET["Serial"] : "";
-                        break;
-                    case 'Объект':
-                        $value = isset($_GET["ServiceName"]) ? $_GET["ServiceName"] : "";
                         break;
                     case 'КЭ':
                         $value = isset($_GET["KE_OBJECT"]) ? $_GET["KE_OBJECT"] : "";

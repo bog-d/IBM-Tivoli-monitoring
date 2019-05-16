@@ -50,8 +50,19 @@ if (!empty($_POST)) {
         if (empty($row['SERVICEINSTANCEID']))
             $search_arr[] = "1 = 0";
         else {
-            ext_tree($row['SERVICEINSTANCEID'], $connection_TBSM, 0, $path_history);
-            $search_arr[] = "PFR_OBJECT in ('".(implode("', '", array_column($results, 'service')))."')";
+            if (!ext_tree($row['SERVICEINSTANCEID'], $connection_TBSM, 0, $path_history))
+                $results[0]['service'] = $_POST['search']['value'];
+
+            $services_str = implode("', '", array_column($results, 'service'));
+
+            $sel_TBSM = "SELECT PFR_KE_TORS FROM DB2INST1.PFR_LOCATIONS WHERE SERVICE_NAME in ('{$services_str}')";
+            $stmt_TBSM = db2_prepare($connection_TBSM, $sel_TBSM);
+            $result_TBSM = db2_execute($stmt_TBSM);
+            while ($row = db2_fetch_assoc($stmt_TBSM))
+                $ke_obj[] = $row['PFR_KE_TORS'];
+
+            $ke_obj = array_unique($ke_obj);
+            $search_arr[] = "PFR_KE_TORS in ('".(implode("', '", $ke_obj))."')";
         }
     }
 

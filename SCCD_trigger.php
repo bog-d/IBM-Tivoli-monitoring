@@ -1156,12 +1156,14 @@ header('Content-Type: text/html;charset=UTF-8');
                 if (empty($run_event)) {
                     // incident send status changes
                     if (strpos($output, 'инцидентов ') !== false) {
+                        $output .= " Узлы: ";
                         foreach ($services as $key => $value) {
                             if (!empty($value['inc_change']))
-                                $output .= " Узлы: {$value['inc_change']}";
+                                $output .= "{$value['inc_change']}; ";
                             $parent_action = $multi_scheme ? "Для подсистемы {$NODEID}: " : "";
                             file_put_contents($log_file, date('d.m.Y H:i:s') . "\t" . $key . "\t" . $acs_user . "\t" . "{$parent_action}{$output}\t" . $comment . "\t" . $incident_write . "\n", FILE_APPEND | LOCK_EX);
-                            $sel = "INSERT INTO DB2INST1.PFR_ACTIONS_LOG (SERVICE_NAME, DISPLAY_NAME, USER, OPERATION, DESCRIPTION, TIMESTAMP, INCIDENT, INITIATOR) VALUES ('" . $key . "', '', '" . $acs_user . "', '{$parent_action}{$output}', '" . $comment . "', CURRENT TIMESTAMP, '" . $incident_write . "', '" . $initiator . "')";
+                            $sel = "INSERT INTO DB2INST1.PFR_ACTIONS_LOG (SERVICE_NAME, DISPLAY_NAME, USER, OPERATION, DESCRIPTION, TIMESTAMP, INCIDENT, INITIATOR) 
+                                    VALUES ('" . $key . "', '', '" . $acs_user . "', '{$parent_action}{$output}', '" . $comment . "', CURRENT TIMESTAMP, '" . $incident_write . "', '" . $initiator . "')";
                             $stmt = db2_prepare($connection_TBSM, $sel);
                             $result = db2_execute($stmt);
                         }
@@ -1683,6 +1685,9 @@ header('Content-Type: text/html;charset=UTF-8');
                         case 'INCIDENT_SEND':
                             echo "<td class='".($cell == 1 ? 'green_status' : 'blue_status')."'><label><input class='btn_form' type='checkbox' name='chkbx_inc[$id]' ".($acs_form ? '' : "disabled='disabled'").">&nbsp;".($cell == 1 ? 'включена' : 'отключена')."</label></td>";
                             break;
+                        case 'TEMS':
+                            echo "<td>{$cell}".(key_exists($cell, $array_RTEMS) ? "<br><font size='-1'>".$array_RTEMS[$cell]."</font>" : "")."</td>";
+                            break;
                         default:
                             echo "<td>" . $cell . "</td>";
                             break;
@@ -1702,7 +1707,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 echo "</td>";
                 echo "<td align=\"center\">";
                     // Event list for all objects
-                echo "<a href=\"event_history_new.php?".($multi_scheme ? "PTK" : "ServiceName")."=" . strtoupper($NODEID) . "&TimeRange=" . date("Y-m-d") . "\" target=\"_blank\">
+                echo "<a href=\"event_history_new.php?ServiceName=" . strtoupper($NODEID) . "&TimeRange=" . date("Y-m-d") . "\" target=\"_blank\">
                                         <img src=\"images/events.png\" title=\"Перейти к журналу событий ".($multi_scheme ? "подсистемы" : "индикатора")."\"></a>";
                 echo "</td>";
                 echo "<td align=\"center\" colspan='6'>";
@@ -2005,6 +2010,10 @@ header('Content-Type: text/html;charset=UTF-8');
                                     break;
                                 case "sit_name":
                                     echo "<td class='td_sit_name'>".$cell."</td>";
+                                    break;
+                                case "descr":
+                                case "sit_form":
+                                    echo "<td>".(iconv_strlen($cell) > 64 ? wordwrap($cell, 64, '<br>', true) : $cell)."</td>";
                                     break;
                                 case "unique":
                                     echo "<td align=\"center\">";

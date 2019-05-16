@@ -46,12 +46,12 @@ $(document).ready(function() {
                 orderable: false
             },
             { data: "PFR_OBJECT",
-                render: function ( data, type, row ) {
-                    return type === "display" ?
-                        data + '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + data + '" target="_blank"' +
-                        'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
-                        data;
-                },
+                // render: function ( data, type, row ) {
+                //     return type === "display" ?
+                //         data + '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + data + '" target="_blank"' +
+                //         'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
+                //         data;
+                // },
                 orderable: false
             },
             { data: "PFR_KE_TORS",
@@ -178,7 +178,7 @@ $(document).ready(function() {
         ],
         language: {
             "processing": "<font color='red'>Пожалуйста, подождите...</font><img src='images/inprogress.gif' hspace='10'>",
-            "search": "Поиск в пределах подсистемы:",
+            "search": "Поиск в составе индикатора/подсистемы:",
             "lengthMenu": "Показать _MENU_ записей",
             "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
             "infoEmpty": "Записи с 0 до 0 из 0 записей",
@@ -282,16 +282,16 @@ $(document).ready(function() {
                         d.DESCRIPTION +
                         // '&emsp;&emsp;<input type="button" onclick="showGraph_operative(' + d.SERIAL + ')" title="Показать график..." value="Хронология">' +
                     '</td>'+
-            '</tr>'+
-                '<tr>'+
-                    '<td>Настройка интеграции с СТП:</td>'+
-                    '<td>' +
-                        '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + d.PFR_OBJECT + '" target="_blank"' +
-                        'title="Перейти в форму по имени объекта мониторинга..."><img src="images/link.png" align="top" hspace="5">перейти по объекту</a>&emsp;&emsp;'+
-                        '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + d.PFR_KE_TORS + '" target="_blank"' +
-                        'title="Перейти в форму по имени КЭ..."><img src="images/link.png" align="top" hspace="5">перейти по КЭ</a>' +
-                    '</td>' +
                 '</tr>'+
+                // '<tr>'+
+                //     '<td>Настройка интеграции с СТП:</td>'+
+                //     '<td>' +
+                //         '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + d.PFR_OBJECT + '" target="_blank"' +
+                //         'title="Перейти в форму по имени объекта мониторинга..."><img src="images/link.png" align="top" hspace="5">перейти по объекту</a>&emsp;&emsp;'+
+                //         '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + d.PFR_KE_TORS + '" target="_blank"' +
+                //         'title="Перейти в форму по имени КЭ..."><img src="images/link.png" align="top" hspace="5">перейти по КЭ</a>' +
+                //     '</td>' +
+                // '</tr>'+
             '</table>';
     }
 } );

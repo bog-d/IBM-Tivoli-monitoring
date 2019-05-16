@@ -224,3 +224,21 @@ function ael_request($param, $value) {
 
     return $event_arr;
 }
+
+// function to get active events from AEL
+function ael_request_2($filters_array) {
+    $event_arr = [];
+    $filter_str = '';
+
+    foreach($filters_array as $param => $value)
+        $filter_str .= "{$param}='{$value}'&";
+
+    exec("curl -X GET --insecure --connect-timeout 10 --user root:passw0rd \"http://10.103.0.60:9595/objectserver/restapi/alerts/status?filter={$filter_str}collist=".implode(',', $GLOBALS['AEL_col_list_arr'])."\"", $arr_data);
+    $json_arr = json_decode(implode(' ', $arr_data), true);
+
+    if ($json_arr['rowset']['affectedRows'] > 0)
+        foreach ($json_arr['rowset']['rows'] as $event)
+            $event_arr[$event['Serial']] = $event;
+
+    return $event_arr;
+}
