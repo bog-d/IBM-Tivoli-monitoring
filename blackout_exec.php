@@ -1,7 +1,7 @@
 <?php
 /*
 	by GDV
-	2018 - RedSys
+	2018-2019 - RedSys
 */
 header('Content-Type: text/html;charset=UTF-8');
 ?>
@@ -9,7 +9,6 @@ header('Content-Type: text/html;charset=UTF-8');
 <html>
 <head>
     <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <meta http-equiv="Refresh" content="<?=$delay?>" />
     <title>Работы по обслуживанию - интеграция Мониторинга с СТП</title>
 </head>
 <body>

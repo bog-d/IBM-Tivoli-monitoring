@@ -655,7 +655,7 @@ header('Content-Type: text/html;charset=UTF-8');
                             $row_data = db2_fetch_assoc($stmt_data);
 
                             // add affected nodes to services array
-                            $services[$row_data['SERVICE_NAME']]['inc_change'] .= "{$row_data['NODE']}; ";
+                            $services[$row_data['SERVICE_NAME']]['inc_change'][] = $row_data['NODE'];
 
                             // alerts.status update
                             $command = "UPDATE alerts.status SET ImpactFlag='UPDATED' WHERE pfr_ke_tors = '{$row_data['PFR_KE_TORS']}'";
@@ -979,22 +979,25 @@ header('Content-Type: text/html;charset=UTF-8');
         // AEL incidents close
         if ($all_inc_send_change == -1 and isset($_POST['inc_close'])) {
             $i = 0;
+            $inc_numbers_arr = [];
             foreach($table_N1_1_data as $value) {
                 if (!empty($value['TTNumber'])) {
                     $inc_number = $value['TTNumber'];
                     $arr_AELoff = [];
                     exec("curl -X POST -d '<UpdateINCIDENT xmlns=\"http://www.ibm.com/maximo\" creationDateTime=\"" . date('c') . "\" transLanguage=\"EN\" messageID=\"123\" maximoVersion=\"7.5\"> <INCIDENTSet><INCIDENT action=\"Change\"><STATUS><![CDATA[CLOSED]]></STATUS><TICKETID>{$inc_number}</TICKETID><WORKLOG action=\"Add\"><CREATEDATE>" . date('c') . "</CREATEDATE><DESCRIPTION_LONGDESCRIPTION><![CDATA[Инцидент закрыт в связи с тех. работами на КЭ]]></DESCRIPTION_LONGDESCRIPTION></WORKLOG></INCIDENT></INCIDENTSet></UpdateINCIDENT>' http://tivoli:12345678@10.103.0.106/meaweb/es/ITM/INCIDENTUpdate", $arr_AELoff);
                     if (strpos($arr_AELoff[0], 'record does not exist in the database') !== false)
-                        $output .= " Инцидент {$inc_number} не существует в БД.";
+                        $inc_numbers_arr['Инциденты не существуют в БД'][] = $inc_number;
                     else if (strpos($arr_AELoff[0], 'is in history and must remain unchanged') !== false)
-                        $output .= " Инцидент {$inc_number} уже заархивирован.";
+                        $inc_numbers_arr['Инциденты уже заархивированы'][] = $inc_number;
                     else if (strpos($arr_AELoff[0], $inc_number) !== false)
-                        $output .= " Инцидент {$inc_number} закрыт.";
+                        $inc_numbers_arr['Инциденты закрыты'][] = $inc_number;
                     else
-                        $output .= " Ошибка при закрытии инцидента {$inc_number}: {$arr_AELoff[0]}.";
+                        $inc_numbers_arr['Ошибки при закрытии инцидентов'][] = "{$inc_number} ({$arr_AELoff[0]})";
                     $i++;
                 }
             }
+            foreach ($inc_numbers_arr as $key => $inc)
+                $output .= " ".$key.": ".implode(', ', $inc);
             if ($i == 0)
                 $output .= " Открытых инцидентов не найдено.";
         }
@@ -1156,10 +1159,9 @@ header('Content-Type: text/html;charset=UTF-8');
                 if (empty($run_event)) {
                     // incident send status changes
                     if (strpos($output, 'инцидентов ') !== false) {
-                        $output .= " Узлы: ";
                         foreach ($services as $key => $value) {
                             if (!empty($value['inc_change']))
-                                $output .= "{$value['inc_change']}; ";
+                                $output .= " Узлы: ".implode(', ', $value['inc_change']);
                             $parent_action = $multi_scheme ? "Для подсистемы {$NODEID}: " : "";
                             file_put_contents($log_file, date('d.m.Y H:i:s') . "\t" . $key . "\t" . $acs_user . "\t" . "{$parent_action}{$output}\t" . $comment . "\t" . $incident_write . "\n", FILE_APPEND | LOCK_EX);
                             $sel = "INSERT INTO DB2INST1.PFR_ACTIONS_LOG (SERVICE_NAME, DISPLAY_NAME, USER, OPERATION, DESCRIPTION, TIMESTAMP, INCIDENT, INITIATOR) 
@@ -1170,7 +1172,8 @@ header('Content-Type: text/html;charset=UTF-8');
                     }
                     if (strpos($output, 'инцидентов ') === false or $multi_scheme) {
                         file_put_contents($log_file, date('d.m.Y H:i:s') . "\t" . $NODEID . " (" . $NODEDESCRIPTION . ")\t" . $acs_user . "\t" . $output . "\t" . $comment . "\t" . $incident_write . "\n", FILE_APPEND | LOCK_EX);
-                        $sel = "INSERT INTO DB2INST1.PFR_ACTIONS_LOG (SERVICE_NAME, DISPLAY_NAME, USER, OPERATION, DESCRIPTION, TIMESTAMP, INCIDENT, INITIATOR) VALUES ('" . $NODEID . "', '" . $NODEDESCRIPTION . "', '" . $acs_user . "', '" . $output . "', '" . $comment . "', CURRENT TIMESTAMP, '" . $incident_write . "', '" . $initiator . "')";
+                        $sel = "INSERT INTO DB2INST1.PFR_ACTIONS_LOG (SERVICE_NAME, DISPLAY_NAME, USER, OPERATION, DESCRIPTION, TIMESTAMP, INCIDENT, INITIATOR) 
+                                    VALUES ('" . $NODEID . "', '" . $NODEDESCRIPTION . "', '" . $acs_user . "', '" . $output . "', '" . $comment . "', CURRENT TIMESTAMP, '" . $incident_write . "', '" . $initiator . "')";
                         $stmt = db2_prepare($connection_TBSM, $sel);
                         $result = db2_execute($stmt);
                     }
