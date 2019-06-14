@@ -40,6 +40,7 @@ header('Content-Type: text/html;charset=UTF-8');
 $captions = array (
     "" => 'png',
     "Время записи" => 'input*2',
+    "Срабатывание ситуации" => 'input*2',
     "Номер" => 'input',
     "Отделение" => 'input',
     "Узел" => 'input',
@@ -142,7 +143,7 @@ echo "</table>";
             <canvas id="graph-operative"></canvas>
         </td>
         <td>
-            <table class="ael_hide" cellpadding="10">
+            <table class="ael_hide" cellpadding="5">
                 <tr>
                     <td rowspan="5" style="border: 2px solid; border-right-color: #FF00FF; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
                     <td rowspan="4" style="border: 2px solid; border-right-color: #FF0000; border-bottom-color: #FFFFFF; border-left-color: #FFFFFF; border-top-color: #FFFFFF;">&nbsp;</td>
@@ -152,33 +153,38 @@ echo "</table>";
                     <th colspan="2" id="serial"></th>
                 </tr>
                 <tr>
-                    <td align="right">--></td>
-                    <td>Закрытие ситуации:</td>
+                    <td style="color: #00b050" align="right" valign="bottom">--></td>
+                    <td style="color: #00b050">Закрытие ситуации:</td>
                     <td id="close_sit"></td>
                 </tr>
                 <tr>
-                    <td colspan="2" align="right">--------></td>
-                    <td>Создание инцидента:</td>
+                    <td style="color: #54C1F0" colspan="2" align="right" valign="bottom">--------></td>
+                    <td style="color: #54C1F0">Создание инцидента:</td>
                     <td id="inc_create"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" align="right">-----------></td>
-                    <td>Срабатывание ситуации:</td>
+                    <td style="color: #FF0000" colspan="3" align="right" valign="bottom">-----------></td>
+                    <td style="color: #FF0000">Срабатывание ситуации:</td>
                     <td id="first_occurrence"></td>
                 </tr>
                 <tr>
-                    <td colspan="4" align="right">-----------------></td>
-                    <td>Горизонт события:</td>
+                    <td style="color: #FF00FF" colspan="4" align="right" valign="bottom">-----------------></td>
+                    <td style="color: #FF00FF">Горизонт события:</td>
                     <td id="start_sit"></td>
                 </tr>
                 <tr>
-                    <td colspan="5"></td>
-                    <td>Частота опроса:</td>
+                    <td colspan="7">&nbsp;</td>
+                </tr>
+<!--                <tr>-->
+<!--                    <td colspan="6">Формула ситуации:</td>-->
+<!--                    <td id="formula"></td>-->
+<!--                </tr>-->
+                <tr>
+                    <td colspan="6">Частота опроса:</td>
                     <td id="frequency"></td>
                 </tr>
                 <tr>
-                    <td colspan="5"></td>
-                    <td>Кол-во последовательных проверок:</td>
+                    <td colspan="6">Кол-во последовательных проверок:</td>
                     <td id="checks"></td>
                 </tr>
             </table>

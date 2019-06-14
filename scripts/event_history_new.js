@@ -30,6 +30,16 @@ $(document).ready(function() {
                 },
                 orderable: true
             },
+            { data: "FIRST_OCCURRENCE",
+                render: function ( data, type, row ) {
+                    var DateTimeSplit = data.split(' ');
+                    var DateSplit = DateTimeSplit[0].split('-');
+                    return type === "display" ?
+                        DateSplit[2] + '.' + DateSplit[1] + '.' + DateSplit[0] + ' ' + DateTimeSplit[1]:
+                        data;
+                },
+                orderable: true
+            },
             { data: "SERIAL",
                 className: 'dt-body-center',
                 render: function ( data, type, row ) {

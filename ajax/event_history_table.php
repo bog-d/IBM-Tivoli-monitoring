@@ -2,6 +2,7 @@
 $fields = array (
     '' => '',
     'WRITETIME' => '',
+    'FIRST_OCCURRENCE' => '',
     'SERIAL' => '',
     'PFR_TORG' => '',
     'NODE' => '',
@@ -70,7 +71,7 @@ if (!empty($_POST)) {
         $field = $i['data'];
         $search = $i['search']['value'];
         if ($search != '')
-            if ($field == 'WRITETIME') {
+            if ($field == 'WRITETIME' or $field == 'FIRST_OCCURRENCE') {
                 list($start, $finish) = explode('*', $search);
                 if (empty($start))
                     $search_arr[] = "substr({$field}, 1, 10) <= '{$finish}'";
@@ -116,7 +117,7 @@ if (!empty($_POST)) {
     $end_pos = $_POST['length'] == -1 ? 0 : ($_POST['start'] + $_POST['length']);
     $sql = "select * from
               (select row_number() over ( order by ".array_keys($fields)[$_POST['order'][0]['column']]." ".$_POST['order'][0]['dir'].") AS N, 
-                      ID, WRITETIME, SERIAL, PFR_TORG, NODE, PFR_OBJECT, PFR_KE_TORS, PFR_SIT_NAME, DESCRIPTION, SEVERITY, TTNUMBER, PFR_TSRM_CLASS, CLASSIFICATIONID, CLASSIFICATIONGROUP, PFR_TSRM_WORDER
+                      ID, WRITETIME, FIRST_OCCURRENCE, SERIAL, PFR_TORG, NODE, PFR_OBJECT, PFR_KE_TORS, PFR_SIT_NAME, DESCRIPTION, SEVERITY, TTNUMBER, PFR_TSRM_CLASS, CLASSIFICATIONID, CLASSIFICATIONGROUP, PFR_TSRM_WORDER
               from DB2INST1.PFR_EVENT_HISTORY
               where {$search_string}) as t
             where ".(empty($end_pos) ? "t.N >= {$start_pos}" : "t.N between {$start_pos} and {$end_pos}");
@@ -131,6 +132,7 @@ if (!empty($_POST)) {
         $data_arr[] = array(
             "DT_RowId" => "row_{$row['ID']}",
             "WRITETIME" => substr($row['WRITETIME'], 0, 19),
+            "FIRST_OCCURRENCE" => substr($row['FIRST_OCCURRENCE'], 0, 19),
             "SERIAL" => $row['SERIAL'],
             "PFR_TORG" => $row['PFR_TORG'],
             "NODE" => $row['NODE'],
