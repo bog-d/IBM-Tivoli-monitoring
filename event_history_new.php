@@ -137,7 +137,6 @@ echo "</table>";
 ?>
 <br/><br/>
 <table align="center" style="width: 100%;">
-<!--    <caption>График метрики мониторинга с отметками по сработавшей ситуации</caption>-->
     <tr>
         <td rowspan="2">
             <canvas id="graph-operative"></canvas>
@@ -175,10 +174,6 @@ echo "</table>";
                 <tr>
                     <td colspan="7">&nbsp;</td>
                 </tr>
-<!--                <tr>-->
-<!--                    <td colspan="6">Формула ситуации:</td>-->
-<!--                    <td id="formula"></td>-->
-<!--                </tr>-->
                 <tr>
                     <td colspan="6">Частота опроса:</td>
                     <td id="frequency"></td>
@@ -209,6 +204,9 @@ echo "</table>";
                 </tr>
             </table>
         </td>
+    </tr>
+    <tr>
+        <td colspan="2" id="formula" align="center"></td>
     </tr>
 </table>
 

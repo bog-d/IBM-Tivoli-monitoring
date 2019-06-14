@@ -75,7 +75,7 @@ if (!$connection_reg) {
 }
 
 // get data about situation
-$select = "select distinct INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$region}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
+$select = "select distinct FORMULA, INTERVAL, COUNT from DB2INST1.PFR_TEMS_SIT_AGGR where REGION = '{$region}' and NODE = '{$node}' and SIT_CODE = '{$sit_code}' and SEVERITY = '{$severity}'";
 $stmt = db2_prepare($connection_TBSM, $select);
 $result = db2_execute($stmt);
 $row = db2_fetch_assoc($stmt);
@@ -88,6 +88,7 @@ if (empty($row)) {
     exit();
 }
 else {
+    $formula = $row['FORMULA'];
     $frequency = substr($row['INTERVAL'], 0, 2)*3600 + substr($row['INTERVAL'], 2, 2)*60 + substr($row['INTERVAL'], 4, 2);
     $checks = $row['COUNT'];
 }
@@ -159,6 +160,7 @@ echo json_encode(array(
     'first_occurrence'  => date('Y-m-d H:i:s', $first_occurrence),
     'inc_create'        => date('Y-m-d H:i:s', $inc_create),
     'close_sit'         => date('Y-m-d H:i:s', $close_sit),
+    'formula'           => $formula,
     'frequency'         => readable_time($frequency, true),
     'checks'            => $checks,
     'error'             => '',

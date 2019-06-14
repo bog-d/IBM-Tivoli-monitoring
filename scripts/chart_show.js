@@ -80,6 +80,7 @@ function showGraph_operative(serial) {
             data.inc_create.indexOf('1970') < 0 ? $('td#inc_create').text(date_conv(data.inc_create)) : $('td#inc_create').text('не создан');
             data.close_sit.indexOf('1970') < 0 ? $('td#close_sit').text(date_conv(data.close_sit)) : $('td#close_sit').text('не закрыта');
             $('table.ael_hide').show();
+            $('td#formula').text('Формула ситуации: ' + data.formula);
             $('td#frequency').text(data.frequency);
             $('td#checks').text(data.checks);
 
