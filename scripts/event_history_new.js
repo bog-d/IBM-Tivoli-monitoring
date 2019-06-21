@@ -293,6 +293,12 @@ $(document).ready(function() {
                         // '&emsp;&emsp;<input type="button" onclick="showGraph_operative(' + d.SERIAL + ')" title="Показать график..." value="Хронология">' +
                     '</td>'+
                 '</tr>'+
+                '<tr>'+
+                    '<td valign="top">' + (d.TRACEROUTE_TITLE.trim() == '' ? '' : 'Результаты трассировки:<br>' + d.TRACEROUTE_TITLE) + '</td>'+
+                    '<td>'+
+                        d.TRACEROUTE_DATA +
+                    '</td>'+
+                '</tr>'+
                 // '<tr>'+
                 //     '<td>Настройка интеграции с СТП:</td>'+
                 //     '<td>' +

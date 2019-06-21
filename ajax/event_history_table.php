@@ -125,9 +125,42 @@ if (!empty($_POST)) {
     $result_WHFED = db2_execute($stmt_WHFED);
 
     while ($row = db2_fetch_assoc($stmt_WHFED)) {
+        // sampled situation detect
         $sql_sit = "select * from DB2INST1.PFR_TEMS_SIT_AGGR where SIT_CODE = '{$row['PFR_SIT_NAME']}' and INTERVAL = '000000'";
         $stmt_TBSM = db2_prepare($connection_TBSM, $sql_sit);
         $result_TBSM = db2_execute($stmt_TBSM);
+
+        // traceroute from ISM_SERVER_ICMP_STATUS situation
+        $trace_title = $trace_data = '';
+        if ($row['PFR_SIT_NAME'] == 'ISM_SERVER_ICMP_STATUS' and $row['SEVERITY'] == 5 and !empty($row['TTNUMBER'])) {
+            // IP detect
+            $sel_TBSM = "SELECT URL FROM DB2INST1.PFR_LOCATIONS WHERE PFR_OBJECT = '{$row['PFR_OBJECT']}' and URL is not null";
+            $stmt_TBSM = db2_prepare($connection_TBSM, $sel_TBSM);
+            $result_TBSM = db2_execute($stmt_TBSM);
+            $ip_arr = [];
+            while ($row_TBSM = db2_fetch_assoc($stmt_TBSM))
+                $ip_arr[] = $row_TBSM['URL'];
+            $ip_arr = array_unique(array_filter($ip_arr));
+
+            // time range detect
+            $inc_time = mktime(substr($row['FIRST_OCCURRENCE'], 11, 2), substr($row['FIRST_OCCURRENCE'], 14, 2), substr($row['FIRST_OCCURRENCE'], 17, 2),
+                substr($row['FIRST_OCCURRENCE'], 5, 2), substr($row['FIRST_OCCURRENCE'], 8, 2), substr($row['FIRST_OCCURRENCE'], 0, 4));
+            $sit_time_min = '1' . date("ymdHis", $inc_time - 301);
+            $sit_time_max = '1' . date("ymdHis", $inc_time + 301);
+
+            // traceroute detect
+            $sel_WHFED = "SELECT * FROM DB2INST1.PFR_TRACEROUTE WHERE (HOST = '{$row['PFR_OBJECT']}' or HOST in ('" . implode("', '", $ip_arr) .
+                "')) and TIMESTAMP > '{$sit_time_min}' and TIMESTAMP < '{$sit_time_max}'";
+            $stmt_WHFED_2 = db2_prepare($connection_WHFED, $sel_WHFED);
+            $result_WHFED_2 = db2_execute($stmt_WHFED_2);
+            $row_WHFED = db2_fetch_assoc($stmt_WHFED_2);
+            $trace_title = empty($row_WHFED) ? "" : "<br>" .
+                        substr($row_WHFED['TIMESTAMP'], 5, 2) . "." . substr($row_WHFED['TIMESTAMP'], 3, 2) . ".20" .
+                        substr($row_WHFED['TIMESTAMP'], 1, 2) . " " . substr($row_WHFED['TIMESTAMP'], 7, 2) . ":" .
+                        substr($row_WHFED['TIMESTAMP'], 9, 2) . ":" . substr($row_WHFED['TIMESTAMP'], 11, 2) .
+                        "<br>с хоста " . $row_WHFED['NODE'];
+            $trace_data = str_replace("\n", "<br>", $row_WHFED['TRACE']);
+        }
 
         $data_arr[] = array(
             "DT_RowId" => "row_{$row['ID']}",
@@ -148,6 +181,8 @@ if (!empty($_POST)) {
             "PFR_TSRM_WORDER" => $row['PFR_TSRM_WORDER'],
             "SAMPLED_SIT" => $row['PFR_SIT_NAME'] == 'OFFLINE' ? false : empty(db2_fetch_assoc($stmt_TBSM)),
             "SIT_IN_COLLECTION" => array_key_exists($row['PFR_SIT_NAME'], $sits_arr),
+            "TRACEROUTE_TITLE" => $trace_title,
+            "TRACEROUTE_DATA" => $trace_data,
         );
     }
     db2_close($connection_WHFED);

@@ -54,7 +54,7 @@ $history = 60;			// maximum days for history
 $page_size = 100;		// page size (records per page)
 
 $table_titles = array (
-        "Время записи",
+        "Срабатывание ситуации",
         "Номер",
         "Отделение",
         "Узел",
@@ -138,18 +138,18 @@ else if (!empty($NODEID)) {
 
 // events selection from DB
 if (!empty($KE_OBJECT) or !empty($NODEID))
-    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE WRITETIME >= to_char (current date - ".$history." DAY, 'YYYY-MM-DD') AND PFR_KE_TORS is not null AND PFR_KE_TORS <> '' AND PFR_KE_TORS IN ".("('".implode("', '", $ke_obj)."')")." ORDER BY WRITETIME DESC";
+    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE FIRST_OCCURRENCE >= to_char (current date - ".$history." DAY, 'YYYY-MM-DD') AND PFR_KE_TORS is not null AND PFR_KE_TORS <> '' AND PFR_KE_TORS IN ".("('".implode("', '", $ke_obj)."')")." ORDER BY FIRST_OCCURRENCE DESC";
 else if (!empty($INCIDENT))
-    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE WRITETIME >= to_char (current date - ".$history." DAY, 'YYYY-MM-DD') AND TTNUMBER = '$INCIDENT' ORDER BY WRITETIME DESC";
+    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE FIRST_OCCURRENCE >= to_char (current date - ".$history." DAY, 'YYYY-MM-DD') AND TTNUMBER = '$INCIDENT' ORDER BY FIRST_OCCURRENCE DESC";
 else
-    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE substr(WRITETIME, 1, 10) = '$period' ORDER BY WRITETIME DESC";
+    $sql = "SELECT * FROM DB2INST1.PFR_EVENT_HISTORY WHERE substr(FIRST_OCCURRENCE, 1, 10) = '$period' ORDER BY FIRST_OCCURRENCE DESC";
 
 $stmt_WHFED = db2_prepare($connection_WHFED, $sql);
 $result_WHFED = db2_execute($stmt_WHFED);
 
 $table_size = 0;
 while ($row = db2_fetch_assoc($stmt_WHFED)) {
-    $row_time = substr($row['WRITETIME'], 0, 19);
+    $row_time = substr($row['FIRST_OCCURRENCE'], 0, 19);
     $table_cells[] = array ( "time" => $row_time,
                              "number" => $row['SERIAL'],
                              "pfr" => $row['PFR_TORG'],
@@ -486,13 +486,26 @@ else {
                     case 'sit_code':
                         if ($web) {
                             echo "<td>" . $cell;
+                            // traceroute from ISM_SERVER_ICMP_STATUS situation
                             if ($cell == 'ISM_SERVER_ICMP_STATUS' and $row['severity'] == 5 and !empty($row['incident'])) {
+                                // IP detect
+                                $sel_TBSM = "SELECT URL FROM DB2INST1.PFR_LOCATIONS WHERE PFR_OBJECT = '{$row['object']}' and URL is not null";
+                                $stmt_TBSM = db2_prepare($connection_TBSM, $sel_TBSM);
+                                $result_TBSM = db2_execute($stmt_TBSM);
+                                $ip_arr = [];
+                                while ($row_TBSM = db2_fetch_assoc($stmt_TBSM))
+                                    $ip_arr[] = $row_TBSM['URL'];
+                                $ip_arr = array_unique(array_filter($ip_arr));
+
+                                // time range detect
                                 $inc_time = mktime(substr($row['time'], 11, 2), substr($row['time'], 14, 2), substr($row['time'], 17, 2),
                                                    substr($row['time'], 5, 2), substr($row['time'], 8, 2), substr($row['time'], 0, 4));
                                 $sit_time_min = '1' . date("ymdHis", $inc_time - 301);
-                                $sit_time_max = '1' . date("ymdHis", $inc_time);
+                                $sit_time_max = '1' . date("ymdHis", $inc_time + 301);
 
-                                $sel_WHFED = "SELECT * FROM DB2INST1.PFR_TRACEROUTE WHERE HOST = '{$row['object']}' and TIMESTAMP > '{$sit_time_min}' and TIMESTAMP < '{$sit_time_max}'";
+                                // traceroute detect
+                                $sel_WHFED = "SELECT * FROM DB2INST1.PFR_TRACEROUTE WHERE (HOST = '{$row['object']}' or HOST in ('".implode("', '", $ip_arr).
+                                    "')) and TIMESTAMP > '{$sit_time_min}' and TIMESTAMP < '{$sit_time_max}'";
                                 $stmt_WHFED = db2_prepare($connection_WHFED, $sel_WHFED);
                                 $result_WHFED = db2_execute($stmt_WHFED);
                                 $row_WHFED = db2_fetch_assoc($stmt_WHFED);
