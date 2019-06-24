@@ -56,21 +56,21 @@ $(document).ready(function() {
                 orderable: false
             },
             { data: "PFR_OBJECT",
-                // render: function ( data, type, row ) {
-                //     return type === "display" ?
-                //         data + '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + data + '" target="_blank"' +
-                //         'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
-                //         data;
-                // },
+                render: function ( data, type, row ) {
+                    return (type === "display" && data.length > 0) ?
+                        data + '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?ServiceName=' + data + '" target="_blank"' +
+                        'title="Перейти в форму \'Настройка интеграции с СТП\' к сервису ' + data + '"><img src="images/link.png" align="top" hspace="5"></a>' :
+                        data;
+                },
                 orderable: false
             },
             { data: "PFR_KE_TORS",
                 render: function ( data, type, row ) {
-                    return type === "display" ?
+                    return (type === "display" && data.length > 0) ?
                         '<a href=\'http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=' + data + '\' ' +
                         'target=\'blank\' title=\'Перейти в СТП к КЭ...\'>' + data + '</a>' +
                         '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + data + '" target="_blank"' +
-                        'title="Перейти в форму \'Настройка интеграции с СТП\'..."><img src="images/link.png" align="top" hspace="5"></a>' :
+                        'title="Перейти в форму \'Настройка интеграции с СТП\' к КЭ ' + data + '"><img src="images/link.png" align="top" hspace="5"></a>' :
                         data;
                 },
                 orderable: false

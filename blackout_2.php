@@ -35,8 +35,9 @@ include 'functions/utime.php';
 
 // shift time (in hours) for operator's view
 const SHIFT  = 12;
-// "!" for the first position on sorting
-const AIS = "Автоматизированные информационные системы";
+// blocks
+const AIS_1 = "Автоматизированные информационные системы (основные КЭ)";
+const AIS_2 = "Автоматизированные информационные системы (неосновные КЭ)";
 // script work mode - operative or historical
 const OPER = 'oper';
 const HIST = 'hist';
@@ -199,13 +200,13 @@ echo "</table><br><br>";
 $sel = "SELECT CI.CINAME, 
                    CI.ASSETLOCSITEID, 
                    CI.DESCRIPTION AS CI_DESC, 
-                   (case when CI.CLASSSTRUCTUREID in $AIS_ke then '".AIS."' else C.SUBSYSTEM end) AS TARGETNAME, 
+                   (case when CI.CLASSSTRUCTUREID not in $AIS_ke then C.SUBSYSTEM else
+                        case when C.SELECT1 = 1 then '".AIS_1."' else '".AIS_2."' end end) AS TARGETNAME, 
                    C.NOTAVAILABLE, 
                    C.STARTTIMECI, 
                    C.ENDTIMECI, 
                    C.FACTSTARTTIMECI, 
                    C.FACTENDTIMECI, 
-                   C.SELECT1,
                    B.DESCRIPTION AS BL_DESC, 
                    B.WORKTYPE AS BL_TYPE, 
                    B.STATUS,
@@ -222,7 +223,7 @@ $sel = "SELECT CI.CINAME,
             ON S.MAXVALUE = CI.ENVIRONID AND S.DOMAINID = 'CIENVIRONSTAND' AND S.DEFAULTS = '1'
             WHERE (B.STATUS = 'ACTIVE' OR B.STATUS = 'INPROG' OR B.STATUS = 'EXPIRED' OR B.STATUS = 'REG') AND
                   (C.FACTSTARTTIMECI IS NOT NULL or B.STATUS = 'ACTIVE' OR B.STATUS = 'REG' OR B.STATUS = 'INPROG')
-            ORDER BY CI.ASSETLOCSITEID, (case when CI.CLASSSTRUCTUREID in $AIS_ke then '".AIS."' else C.SUBSYSTEM end), CI.CINAME ASC";
+            ORDER BY CI.ASSETLOCSITEID, CI.CINAME ASC";
 $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
 $result = db2_execute($stmt_SCCD);
 
@@ -259,7 +260,6 @@ while ($row = db2_fetch_assoc($stmt_SCCD)) {
             "start_vis" => (utime($start_time) < $timestamp_vis_start ? $timestamp_vis_start : utime($start_time)),
             "end_vis" => ($end_time == 0 or utime($end_time) > $timestamp_vis_end) ? $timestamp_vis_end : utime($end_time),
             "down_time" => "",
-            "basic_KE" => $row['SELECT1'],
             "bl_desc" => $row['BL_DESC'],
             "bl_type" => $row['BL_TYPE'],
             "status" => $row['STATUS']
@@ -397,9 +397,14 @@ $ptk_count = 0;
 $ke_count = 0;
 $ptk_arr = array_unique(array_column($table_cells, 'targetname'));
 asort($ptk_arr);
-if (($k = array_search(AIS, $ptk_arr)) !== false ) {
+// add some elements to begin or end of PTK's array
+if (($k = array_search(AIS_2, $ptk_arr)) !== false ) {
     unset($ptk_arr[$k]);
-    array_unshift($ptk_arr, AIS);
+    array_unshift($ptk_arr, AIS_2);
+}
+if (($k = array_search(AIS_1, $ptk_arr)) !== false ) {
+    unset($ptk_arr[$k]);
+    array_unshift($ptk_arr, AIS_1);
 }
 if (($k = array_search('Н/Д', $ptk_arr)) !== false ) {
     unset($ptk_arr[$k]);
@@ -410,9 +415,15 @@ if (($k = array_search('', $ptk_arr)) !== false ) {
     $ptk_arr[] = 'КЭ без определённой зависимости';
 }
 
+$block_title_not_typed = true;
 foreach ($ptk_arr as $k => $PTK) {
-    if ($PTK == AIS)
-        echo "<h2 align='center'>".AIS."</h2>";
+    // block title
+    if ($PTK == AIS_1 or $PTK == AIS_2)
+        echo "<h2 align='center'>{$PTK}</h2>";
+    else if ($block_title_not_typed) {
+        echo "<h2 align='center'>Конфигурационные элементы</h2>";
+        $block_title_not_typed = false;
+    }
 
     // count KE in PTK to show or hide the block
     $i = 0;
@@ -423,11 +434,12 @@ foreach ($ptk_arr as $k => $PTK) {
         continue;
 
     $ptk_count++;
-    if ($PTK != AIS)
+    if ($PTK != AIS_1 and $PTK != AIS_2)
         $ke_count++;
 
     // PTK name output
-    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10150;&nbsp;".($PTK == AIS ? 'АИС' : $PTK)." (показать/скрыть)</h4>";
+    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10150;&nbsp;".
+        (($PTK == AIS_1 or $PTK == AIS_2) ? substr(explode('(', $PTK)[1], 0, -1)  : $PTK)." (показать/скрыть)</h4>";
     echo "<table class='blackout_PTK_{$k}' width='100%'><tr><td>";
 
     // Gantt chart
@@ -537,19 +549,19 @@ foreach ($ptk_arr as $k => $PTK) {
     echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width='80%'>";
     echo "<tr>";
     foreach ($title_cells as $title_row) {
-        if (($title_row != 'Код ОПФР' or $cur_reg == '000') and ($title_row != 'Среда' or $PTK ==AIS)) {
+        if (($title_row != 'Код ОПФР' or $cur_reg == '000') and ($title_row != 'Среда' or $PTK ==AIS_1 or $PTK ==AIS_2)) {
             echo "<th>".$title_row."</th>";
         }
     }
     echo "</tr>";
 
-    // AIS table filters
-    if ($PTK ==AIS) {
+    // AISs table filters
+    if ($PTK == AIS_1 or $PTK ==AIS_2) {
         echo "<tr>";
         ?> <form action="<?php echo $_SERVER['PHP_SELF'];?>?mode=<?php echo $mode;?>&reg=<?php echo $cur_reg;?>&auto_refresh=<?php echo $auto_refresh ? $ref_yes : $ref_no;?>&date_range=<?php echo $selected_date;?>&offset=<?php echo $offset;?>" method="post" id="filterId"> <?php
             echo "<td class=\"col_filter\" colspan='".($cur_reg == '000' ? 3 : 2)."'></td>";
             echo "<td class=\"col_filter\">";
-            $env_array = array_filter(array_unique(array_column(array_filter($table_cells, function($rec) { return $rec['targetname'] == AIS; }), 'environment')));
+            $env_array = array_filter(array_unique(array_column(array_filter($table_cells, function($rec) { return ($rec['targetname'] == AIS_1 or $rec['targetname'] == AIS_2); }), 'environment')));
             asort($env_array);
             ?> <select name="env" size="1">
                 <option value="">(нет фильтра)</option> <?php
@@ -588,7 +600,7 @@ foreach ($ptk_arr as $k => $PTK) {
                             echo "<td>".$cell."</td>";
                         break;
                     case "environment":
-                        if ($PTK == AIS)
+                        if ($PTK == AIS_1 or $PTK == AIS_2)
                             echo "<td>".$cell."</td>";
                         break;
                     case "start":
@@ -627,12 +639,11 @@ foreach ($ptk_arr as $k => $PTK) {
         }
     }
     echo "</table>";
-    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10149;&nbsp;".($PTK == AIS ? 'АИС' : $PTK)." (показать/скрыть)</h4>";
+    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10149;&nbsp;".
+        (($PTK == AIS_1 or $PTK == AIS_2) ? substr(explode('(', $PTK)[1], 0, -1) : $PTK)." (показать/скрыть)</h4>";
     echo "<br><br><br>";
 
     echo "</td></tr></table>";
-    if ($PTK == AIS)
-        echo "<h2 align='center'>Конфигурационные элементы</h2>";
 }
 
 if (empty($ptk_count) or empty($ke_count))

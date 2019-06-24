@@ -62,6 +62,7 @@ header('Content-Type: text/html;charset=UTF-8');
     $table_N2_titles = array (
         "Расположение агента в сервисной модели мониторинга",
         "Ссылка на КЭ*",
+        "URL",
         "Статус ситуации в TEMS",
         "Наименование ситуации в TEMS (фильтр ситуации, если применимо)",
         "Код события",
@@ -74,6 +75,7 @@ header('Content-Type: text/html;charset=UTF-8');
         "number" => "",
         "place" => "",
         "ke" => "",
+        "url" => "",
         "hubs" => array(array()),
         "sit_name" => "",
         "sit_code" => "",
@@ -924,6 +926,7 @@ header('Content-Type: text/html;charset=UTF-8');
                         "number" => $i++,
                         "place" => $new_place,
                         "ke" => $new_ke,
+                        "url" => $row['DESCRIPTION'],
                         "hubs" => array($row['STATUS'] => array($row['TEMS'])),
                         "sit_name" => $new_sit_name,
                         "sit_code" => $row['SIT_CODE'] == 'OFFLINE' ? '!OFFLINE' : (empty($row['SIT_CODE']) ? '-' : $row['SIT_CODE']),
@@ -1030,10 +1033,10 @@ header('Content-Type: text/html;charset=UTF-8');
         // array sort
         foreach ($table_N2_data as $key => $row) {
             $col_place[$key] = $row['place'];
+            $col_ke[$key] = $row['ke'];
             $col_sit_name[$key] = $row['sit_name'];
-            $col_sit_code[$key] = $row['sit_code'];
         }
-        array_multisort($col_place, SORT_ASC, $col_sit_code, SORT_ASC, $col_sit_name, SORT_ASC, $table_N2_data);
+        array_multisort($col_place, SORT_ASC, $col_ke, SORT_ASC, $col_sit_name, SORT_ASC, $table_N2_data);
 
         // '!OFFLINE' renames back to 'OFFLINE'
         foreach ($table_N2_data as &$row) {
@@ -1049,8 +1052,8 @@ header('Content-Type: text/html;charset=UTF-8');
         ob_flush();
         flush();
 
-        foreach (array_filter($pfr_ke_tors) as $ke_tors) {
-            $sel = "SELECT  ci.CINAME, ci.STATUS, ci.ASSETLOCSITEID, cl.CLASSSTRUCTUREID, cl.FAILURECODE, cl.INCTYPEDESC, cl.DELAYMIN, str.CLASSIFICATIONID, str.DESCRIPTION, str.PERSONGROUP, p.DISPLAYNAME
+        foreach (array_unique(array_filter($pfr_ke_tors)) as $ke_tors) {
+            $sel = "SELECT ci.CINAME, ci.STATUS, ci.ASSETLOCSITEID, cl.CLASSSTRUCTUREID, cl.FAILURECODE, cl.INCTYPEDESC, cl.DELAYMIN, str.CLASSIFICATIONID, str.DESCRIPTION, str.PERSONGROUP, p.DISPLAYNAME
                 FROM 
                     (SELECT CINUM, CINAME, STATUS, ASSETLOCSITEID FROM MAXIMO.CI WHERE CINAME = '" . $ke_tors['ke'] . "') AS ci
                 LEFT JOIN MAXIMO.CICLASS cl
@@ -1963,6 +1966,7 @@ header('Content-Type: text/html;charset=UTF-8');
                     echo "</table>";
                 echo "</td>";
                 echo "<td class=\"col_filter\"></td>";
+                echo "<td class=\"col_filter\"></td>";
                 echo "<td class=\"col_filter\" align='center'><input type='text' id='filter_sit_name' name='filter_sit_name' size='30' maxlength='256' value='' title='Динамический фильтр по столбцу'><img src='images/filter.png' hspace='10'></td>";
                 echo "<td class=\"col_filter\"></td>";
                 echo "<td class=\"col_filter\"></td>";
@@ -2016,7 +2020,7 @@ header('Content-Type: text/html;charset=UTF-8');
                                     break;
                                 case "descr":
                                 case "sit_form":
-                                    echo "<td>".(iconv_strlen($cell) > 64 ? wordwrap($cell, 64, '<br>', true) : $cell)."</td>";
+                                    echo "<td>".(iconv_strlen($cell) > 64 ? wordwrap($cell, 64, ' ', true) : $cell)."</td>";
                                     break;
                                 case "unique":
                                     echo "<td align=\"center\">";
@@ -2035,7 +2039,7 @@ header('Content-Type: text/html;charset=UTF-8');
 
             // total number of records
             echo "<tr>";
-                echo "<td colspan=9>";
+                echo "<td colspan=10>";
                     echo "Общее количество строк в таблице: ".($i-1);
                     echo "<h4 class='table_sit_toggle'>Cкрыть таблицу</h4>";
                 echo "</td>";
