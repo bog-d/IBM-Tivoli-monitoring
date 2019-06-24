@@ -912,7 +912,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 // find formula description
                 $sit_form_descr = array_key_exists($row['SIT_NAME'], $form_descr_arr) ? $form_descr_arr[$row['SIT_NAME']]['formula'] : '';
 
-                // unique combination (place + ke + sit_name + status) check
+                // unique combination (place + ke + sit_name + region) check
                 $new_place = $row['AGENT_NODE'] == '' ? $row['NODE'] : $row['AGENT_NODE'];
                 $new_ke = $row['SIT_NAME'] != "MS_Offline" ? $row['PFR_KE_TORS'] : "---";
                 $new_sit_name = $row['SIT_NAME'] . ($row['SIT_NAME'] == "MS_Offline" ? " (агент " . $row['SUBCATEGORY'] . ")" : "");
@@ -926,7 +926,7 @@ header('Content-Type: text/html;charset=UTF-8');
                         "number" => $i++,
                         "place" => $new_place,
                         "ke" => $new_ke,
-                        "url" => $row['DESCRIPTION'],
+                        "url" => array($row['DESCRIPTION']),
                         "hubs" => array($row['STATUS'] => array($row['TEMS'])),
                         "sit_name" => $new_sit_name,
                         "sit_code" => $row['SIT_CODE'] == 'OFFLINE' ? '!OFFLINE' : (empty($row['SIT_CODE']) ? '-' : $row['SIT_CODE']),
@@ -937,9 +937,12 @@ header('Content-Type: text/html;charset=UTF-8');
                         "unique" => $new_unique,
                     );
                 }
-                // add new HUB with the situation's status
-                else
+                else {
+                    // add new URL for the same KE
+                    $table_N2_data[$key]['url'][] = $row['DESCRIPTION'];
+                    // add new HUB with the situation's status
                     $table_N2_data[$key]['hubs'][$row['STATUS']][] = $row['TEMS'];
+                }
 
                 if ($key === false) {
                     // run test event(s)
@@ -1992,6 +1995,9 @@ header('Content-Type: text/html;charset=UTF-8');
                         foreach ($row as $key => $cell) {
                             switch ($key) {
                                 case "number":
+                                    break;
+                                case "url":
+                                    echo "<td>".implode('<br>', array_unique($cell))."</td>";
                                     break;
                                 case "hubs":
                                     echo "<td align=\"center\">";
