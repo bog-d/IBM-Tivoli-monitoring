@@ -50,7 +50,12 @@ h3 {
 th {
 	background-color: #F4F4F4;
 }
-.red_status {
+th.green {
+	background-color: #92D050;
+}
+th.red {
+	background-color: #F99797;
+}.red_status {
 	background-color: #F99797;
 }
 .yellow_status {

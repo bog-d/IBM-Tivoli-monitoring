@@ -37,7 +37,7 @@ $items = array (
 
 $sit_name_base = '';
 $sit_name_new = '';
-$mode ='';
+$mode ='view';
 $output = '';
 $error = false;
 
@@ -45,7 +45,7 @@ $error = false;
 $sit_arr = [];
 
 // there is template in a string
-$templ;
+$templ = null;
 
 /******************************************************************************************************************/
 
@@ -113,16 +113,12 @@ echo "<br><br><table class='gantt' cellpadding='10' align='center'>";
     echo "</tr>";
     echo "<tr class='first'>";
         echo "<td valign='top'>";
-            echo "<select size = '10' name = 'sits_list'>";
+            echo "<select size = '13' name = 'sits_list'>";
                 $sel = "SELECT DISTINCT PFR_SIT_NAME FROM DB2INST1.PFR_SITS_CONSTRUCTOR ORDER BY PFR_SIT_NAME ASC";
                 $stmt = db2_prepare($connection_TBSM, $sel);
                 $result = db2_execute($stmt);
-
-                if ($mode != 'delete')
-                    $mode = empty($sit_name_base) ? 'new' : (empty($sit_name_new) ? 'edit' : 'clone');
-                while ($row = db2_fetch_assoc($stmt)) {
+                while ($row = db2_fetch_assoc($stmt))
                     echo "<option value ='{$row['PFR_SIT_NAME']}' " . ($row['PFR_SIT_NAME'] == $sit_name_base ? 'selected' : '') . ">{$row['PFR_SIT_NAME']}</option>";
-                }
             echo "</select>";
         echo "</td>";
         echo "<td valign='center'>";
@@ -141,15 +137,23 @@ echo "<br><br><table class='gantt' cellpadding='10' align='center'>";
 echo "</table><br><br><hr><br>";
 echo "</form>";
 
-if ($mode != 'delete' and (!empty($sit_name_base) or !empty($sit_name_new))) {
+if ($mode != 'delete' and (!isset($_GET["mode"]) or $_GET["mode"] != 'view')) {
+    if (empty($sit_name_base) and !empty($sit_name_new))
+        $mode = 'new';
+    else if (!empty($sit_name_base) and empty($sit_name_new))
+        $mode = 'edit';
+    else if (!empty($sit_name_base) and !empty($sit_name_new))
+        $mode = 'clone';
+}
+if ($mode != 'delete' and $mode != 'view') {
     echo "<form action='{$_SERVER['PHP_SELF']}?mode={$mode}&Sit_name=".($mode == 'edit' ? $sit_name_base : $sit_name_new)."' method='post' id='formEdit'>";
     if ($mode == 'new')
-        echo"<h3>Добавление новой ситуации \"{$sit_name_new}\"";
+        echo"<h3 align='center'>Добавление новой ситуации \"{$sit_name_new}\"";
     else {
         if ($mode == 'edit')
-            echo "<h3>Редактирование ситуации \"{$sit_name_base}\"";
+            echo "<h3 align='center'>Редактирование ситуации \"{$sit_name_base}\"";
         if ($mode == 'clone')
-            echo "<h3>Клонирование ситуации \"{$sit_name_base}\" в \"{$sit_name_new}\"";
+            echo "<h3 align='center'>Клонирование ситуации \"{$sit_name_base}\" в \"{$sit_name_new}\"";
 
         $sel = "SELECT * FROM DB2INST1.PFR_SITS_CONSTRUCTOR WHERE PFR_SIT_NAME = '{$sit_name_base}'";
         $stmt = db2_prepare($connection_TBSM, $sel);
@@ -157,13 +161,14 @@ if ($mode != 'delete' and (!empty($sit_name_base) or !empty($sit_name_new))) {
         while ($row = db2_fetch_assoc($stmt))
             $sit_arr[$row['POSITION']][$row['SEVERITY']] = $row['STRING'];
     }
-    echo "&emsp;<button type='submit' class='btn_blue' name='save_btn' value='Сохранить' title='Сохранить ситуацию' ".($acs_form ? '' : 'disabled')." onclick=\"return confirm('Сохранить описание ситуации в БД?..')\"><img src='images/events.png' height='16' width='16'> Сохранить</button></h3>";
+    echo "&emsp;<button type='submit' class='btn_blue' name='save_btn' value='Сохранить' title='Сохранить ситуацию' ".($acs_form ? '' : 'disabled')." onclick=\"return confirm('Сохранить описание ситуации в БД?..')\"><img src='images/events.png' height='16' width='16'> Сохранить</button>";
+    echo "&emsp;<button type='submit' class='btn_blue' name='cancel_btn' value='Отменить' title='Отменить и вернуться' ".($acs_form ? '' : 'disabled')." onclick=\"return confirm('Если были сделаны изменения, они будут утеряны!')\"><img src='images/details_close.png' height='16' width='16'> Отменить</button></h3>";
 
-    echo "<table border='1' cellpadding='10'>";
+    echo "<table border='1' cellpadding='10' align='center'>";
         echo "<tr>";
             echo "<th rowspan='2'>№ поля</th>";
-            echo "<th>Шаблон описания при срабатывании ситуации</th>";
-            echo "<th>Шаблон описания при закрытии ситуации</th>";
+            echo "<th class='red'>Шаблон описания при срабатывании ситуации</th>";
+            echo "<th class='green'>Шаблон описания при закрытии ситуации</th>";
         echo "</tr>";
 
         echo "<tr>";
@@ -203,6 +208,38 @@ if ($mode != 'delete' and (!empty($sit_name_base) or !empty($sit_name_new))) {
         }
     echo "</table>";
     echo "</form>";
+}
+else if ($mode == 'view') {
+    $sel = "SELECT * FROM DB2INST1.PFR_SITS_CONSTRUCTOR ORDER BY PFR_SIT_NAME asc, SEVERITY desc, POSITION asc";
+    $stmt = db2_prepare($connection_TBSM, $sel);
+    $result = db2_execute($stmt);
+    while ($row = db2_fetch_assoc($stmt))
+        $sit_arr[$row['PFR_SIT_NAME']][$row['SEVERITY']][$row['POSITION']] = $row['STRING'];
+
+    echo "<table border='1' cellpadding='10' align='center'>";
+        echo "<tr id='title'>";
+            echo "<th class='red'>Шаблон описания при срабатывании ситуации</th>";
+            echo "<th class='green'>Шаблон описания при закрытии ситуации</th>";
+        echo "</tr>";
+
+        foreach($sit_arr as $sit_name => $arr1) {
+            echo "<tr class='rec_hide' id='".strtolower($sit_name)."'>";
+                foreach($arr1 as $sev => $arr2) {
+                    echo "<td class='page_title_dark'>";
+                        echo "<table cellpadding='0' cellspacing='0'>";
+                            echo "<tr>";
+                                foreach($arr2 as $pos => $str) {
+                                    echo "<td nowrap>";
+                                        echo str_replace(' ', "&nbsp;", $str);
+                                    echo "</td>";
+                                }
+                            echo "</tr>";
+                        echo "</table>";
+                    echo "</td>";
+                }
+            echo "</tr>";
+        }
+    echo "</table>";
 }
 
 // database connection close

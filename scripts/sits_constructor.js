@@ -1,3 +1,28 @@
+// показ шаблона ситуации в нижней таблице
+sit_selected = '';
+$(function() {
+    // при первой загрузке страницы, если было что-то выбрано
+    if (!sit_selected && $('select[name=sits_list]').val()) {
+        // показываем в нижней таблице строку с выбранной ситуацией
+        sit_selected = $('select[name=sits_list]').val().toLowerCase();
+        $('tr#' + sit_selected).show(function () {
+            $('tr#' + sit_selected).animate({}, 2000);
+        });
+    }
+
+    // при выборе ситуации в списке ситуаций
+    $('select[name=sits_list]').change(function() {
+        // прячем в нижней таблице строку с предыдущим выбором
+        if (sit_selected)
+            $('tr#'+sit_selected).hide();
+        // показываем в нижней таблице строку с выбранной ситуацией
+        sit_selected = $('select[name=sits_list]').val().toLowerCase();
+        $('tr#'+sit_selected).show(function () {
+            $('tr#'+sit_selected).animate({}, 2000);
+        });
+    });
+});
+
 // нажатие кнопки "Создать новую"
 $(function() {
     $('button[name=new_btn]').click(function() {

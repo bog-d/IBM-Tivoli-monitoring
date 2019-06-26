@@ -1047,6 +1047,13 @@ header('Content-Type: text/html;charset=UTF-8');
                 $row['sit_code'] = 'OFFLINE';
         }
         unset($row);
+
+        // situations templates for constructor
+        $sel = "SELECT DISTINCT PFR_SIT_NAME FROM DB2INST1.PFR_SITS_CONSTRUCTOR";
+        $stmt = db2_prepare($connection_TBSM, $sel);
+        $result = db2_execute($stmt);
+        while ($row = db2_fetch_assoc($stmt))
+            $sit_templ_arr[] = $row['PFR_SIT_NAME'];
     }
 
     // fill array with MAXIMO data
@@ -2023,6 +2030,11 @@ header('Content-Type: text/html;charset=UTF-8');
                                     break;
                                 case "sit_name":
                                     echo "<td class='td_sit_name'>".$cell."</td>";
+                                    break;
+                                case "sit_code":
+                                    echo "<td>".(in_array($cell, $sit_templ_arr) ?
+                                            "<a href='http://10.103.0.60/pfr_other/Sits_constructor.php?mode=view&Sit_base={$cell}' target='_blank' title='Перейти к конструктору ситуации'>{$cell}</a>" :
+                                            $cell)."</td>";
                                     break;
                                 case "descr":
                                 case "sit_form":
