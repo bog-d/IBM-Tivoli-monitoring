@@ -22,6 +22,7 @@ if (isset($_POST['formId']['ref'])) {
     <link href="css/style.css" type="text/css" rel="stylesheet">
     <title>Работы по обслуживанию</title>
     <script src="scripts/jquery-3.2.1.min.js"></script>
+    <script src="scripts/jquery.stickytableheaders.min.js"></script>
     <script src="scripts/blackout.js"></script>
 </head>
 <body>
@@ -70,6 +71,8 @@ $table_intersection = [];
 $col_date_pre = array();
 // array of unique dates with works
 $col_date = array();
+// array of base KE
+$base_ke_arr = array();
 
 // work types
 $work_type = array (
@@ -197,33 +200,34 @@ echo "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\" bg
 echo "</table><br><br>";
 
 // record(s) selection from MAXIMO tables
-$sel = "SELECT CI.CINAME, 
-                   CI.ASSETLOCSITEID, 
-                   CI.DESCRIPTION AS CI_DESC, 
-                   (case when CI.CLASSSTRUCTUREID not in $AIS_ke then C.SUBSYSTEM else
-                        case when C.SELECT1 = 1 then '".AIS_1."' else '".AIS_2."' end end) AS TARGETNAME, 
-                   C.NOTAVAILABLE, 
-                   C.STARTTIMECI, 
-                   C.ENDTIMECI, 
-                   C.FACTSTARTTIMECI, 
-                   C.FACTENDTIMECI, 
-                   B.DESCRIPTION AS BL_DESC, 
-                   B.WORKTYPE AS BL_TYPE, 
-                   B.STATUS,
-                   B.PMCHGBLACKOUTID,
-                   B.STARTTIME,
-                   B.ENDTIME,
-                   S.DESCRIPTION AS ENVIRONMENT
-            FROM MAXIMO.PMCHGBLACKOUT AS B 
-            LEFT JOIN MAXIMO.PMCHGBOCI AS C 
-            ON B.BLACKOUTNUM = C.BLACKOUTNUM AND C.ISTEMPLATE = 0
-            LEFT JOIN MAXIMO.CI AS CI
-            ON C.CINUM = CI.CINUM AND C.STARTTIMECI IS NOT NULL 
-            LEFT JOIN MAXIMO.SYNONYMDOMAIN AS S
-            ON S.MAXVALUE = CI.ENVIRONID AND S.DOMAINID = 'CIENVIRONSTAND' AND S.DEFAULTS = '1'
-            WHERE (B.STATUS = 'ACTIVE' OR B.STATUS = 'INPROG' OR B.STATUS = 'EXPIRED' OR B.STATUS = 'REG') AND
-                  (C.FACTSTARTTIMECI IS NOT NULL or B.STATUS = 'ACTIVE' OR B.STATUS = 'REG' OR B.STATUS = 'INPROG')
-            ORDER BY CI.ASSETLOCSITEID, CI.CINAME ASC";
+$sel = "SELECT 
+           CI.CINAME, 
+           CI.ASSETLOCSITEID, 
+           CI.DESCRIPTION AS CI_DESC, 
+           (case when CI.CLASSSTRUCTUREID not in $AIS_ke then C.SUBSYSTEM else
+                case when C.SELECT1 = 1 then '".AIS_1."' else '".AIS_2."' end end) AS TARGETNAME, 
+           C.NOTAVAILABLE, 
+           C.STARTTIMECI, 
+           C.ENDTIMECI, 
+           C.FACTSTARTTIMECI, 
+           C.FACTENDTIMECI, 
+           B.DESCRIPTION AS BL_DESC, 
+           B.WORKTYPE AS BL_TYPE, 
+           B.STATUS,
+           B.PMCHGBLACKOUTID,
+           B.STARTTIME,
+           B.ENDTIME,
+           S.DESCRIPTION AS ENVIRONMENT
+        FROM MAXIMO.PMCHGBLACKOUT AS B 
+        LEFT JOIN MAXIMO.PMCHGBOCI AS C 
+        ON B.BLACKOUTNUM = C.BLACKOUTNUM AND C.ISTEMPLATE = 0
+        LEFT JOIN MAXIMO.CI AS CI
+        ON C.CINUM = CI.CINUM AND C.STARTTIMECI IS NOT NULL 
+        LEFT JOIN MAXIMO.SYNONYMDOMAIN AS S
+        ON S.MAXVALUE = CI.ENVIRONID AND S.DOMAINID = 'CIENVIRONSTAND' AND S.DEFAULTS = '1'
+        WHERE (B.STATUS = 'ACTIVE' OR B.STATUS = 'INPROG' OR B.STATUS = 'EXPIRED' OR B.STATUS = 'REG') AND
+              (C.FACTSTARTTIMECI IS NOT NULL or B.STATUS = 'ACTIVE' OR B.STATUS = 'REG' OR B.STATUS = 'INPROG')
+        ORDER BY CI.ASSETLOCSITEID, CI.CINAME ASC";
 $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
 $result = db2_execute($stmt_SCCD);
 
@@ -271,6 +275,45 @@ while ($row = db2_fetch_assoc($stmt_SCCD)) {
     for ($i = mktime(0, 0, 0, $date_time_array['mon'], $date_time_array['mday'], $date_time_array['year']);
          $i < ($end_time == 0 ? time() : utime($end_time)); $i += 86400) {
         $col_date_pre[] = date('Y-m-d', $i);
+    }
+}
+
+// array sort by targetname (AIS_1 -> AIS_2 -> other -> empty)
+usort ($table_cells, function ($x, $y) {
+    if ($x['targetname'] == $y['targetname'])
+        return strcmp($x['ciname'], $y['ciname']);
+    else if ($x['targetname'] == AIS_1)
+        return -1;
+    else if ($y['targetname'] == AIS_1)
+        return 1;
+    else if ($x['targetname'] == AIS_2)
+        return -1;
+    else if ($y['targetname'] == AIS_2)
+        return 1;
+    else if ($x['targetname'] == '')
+        return 1;
+    else if ($y['targetname'] == '')
+        return -1;
+    else
+        return strcmp($x['targetname'], $y['targetname']);
+});
+
+// base KE array
+foreach ($table_cells as $ke) {
+    if ($ke['targetname'] == AIS_1) {
+        $sel = "select distinct c2.CINAME
+                from MAXIMO.PMCHGBOCI c1
+                inner join MAXIMO.PMCHGBOCI c2 
+                on c2.SELECT1 = 0 and c2.PARENTCI is not null and c2.PARENTCI = c1.CINAME
+                where c1.SELECT1 = 1 and c1.CINAME = '{$ke['ciname']}'";
+        $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
+        $result = db2_execute($stmt_SCCD);
+
+        while ($row = db2_fetch_assoc($stmt_SCCD)) {
+            if (in_array($row['CINAME'], array_column($table_cells, 'ciname'))) {
+                $base_ke_arr[$ke['ciname']][] = $row['CINAME'];
+            }
+        }
     }
 }
 
@@ -546,8 +589,8 @@ foreach ($ptk_arr as $k => $PTK) {
     echo "</table>";
 
     // KE table titles
-    echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width='80%'>";
-    echo "<tr>";
+    echo "<br><table class='sticky' border='1' cellspacing='0' cellpadding='5' width='80%'>";
+    echo "<thead><tr>";
     foreach ($title_cells as $title_row) {
         if (($title_row != 'Код ОПФР' or $cur_reg == '000') and ($title_row != 'Среда' or $PTK ==AIS_1 or $PTK ==AIS_2)) {
             echo "<th>".$title_row."</th>";
@@ -578,67 +621,22 @@ foreach ($ptk_arr as $k => $PTK) {
         echo "</tr>";
     }
 
+    echo "</thead><tbody>";
     // KE output
     foreach ($table_cells as $row) {
-        if ($row['targetname'] === $PTK and (empty($filter_env) or $filter_env == $row['environment'])) {
-            echo "<tr>";
-            foreach ($row as $key => $cell) {
-                switch ($key) {
-                    case "id": $id = $cell;
-                    case "targetname":
-                    case "subsys_exemplar":
-                    case "avail":
-                        break;
-                    case "ciname":
-                        if (empty($cell))
-                            echo "<td>Для ТР{$id} нет затронутых КЭ</td>";
-                        else
-                            echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=".$cell."\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">".$cell."</a></td>";
-                        break;
-                    case "region":
-                        if ($cur_reg == '000')
-                            echo "<td>".$cell."</td>";
-                        break;
-                    case "environment":
-                        if ($PTK == AIS_1 or $PTK == AIS_2)
-                            echo "<td>".$cell."</td>";
-                        break;
-                    case "start":
-                        $start = $cell;
-                    case "end":
-                        $end = $cell;
-                        echo "<td>".(empty($cell) ? 'не запланировано' : date('d.m.Y H:i', $cell))."</td>";
-                        break;
-                    case "start_vis":
-                    case "end_vis":
-                        break;
-                    case "down_time":
-                        echo "<td>";
-                        if (!empty($end)) {
-                            $sec = $end - $start;
-                            $h = floor($sec / 3600);
-                            $m = floor($sec / 60) - $h * 60;
-                            echo ($h > 0 ? $h." ч " : "").(strlen($m) < 2 ? "0" : "").$m." мин";
-                        }
-                        else
-                            echo "---";
-                        echo "</td>";
-                        break;
-                    case "bl_type":
-                        echo "<td>".$work_type[$cell]."</td>";
-                        break;
-                    case "status":
-                        echo "<td>".$work_status[$cell]."</td>";
-                        break;
-                    default:
-                        echo "<td>".$cell."</td>";
-                        break;
-                }
+        if ((empty($filter_env) or $filter_env == $row['environment'])) {
+            if ($PTK == AIS_1) {
+                table_output($row);
+                foreach ($table_cells as $row_2)
+                    if (empty($filter_env) or $filter_env == $row_2['environment'])
+                        if ($row_2['targetname'] == AIS_2 and key_exists($row['ciname'], $base_ke_arr) and in_array($row_2['ciname'], $base_ke_arr[$row['ciname']]))
+                            table_output($row_2);
             }
-            echo "</tr>";
+            else if ($row['targetname'] === $PTK)
+                table_output($row);
         }
     }
-    echo "</table>";
+    echo "</tbody></table>";
     echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10149;&nbsp;".
         (($PTK == AIS_1 or $PTK == AIS_2) ? substr(explode('(', $PTK)[1], 0, -1) : $PTK)." (показать/скрыть)</h4>";
     echo "<br><br><br>";
@@ -653,6 +651,70 @@ echo "<br \>";
 
 // database connections close
 db2_close($connection_SCCD);
+
+function table_output($el)
+{
+    $id = $start = '';
+    $work_type = $GLOBALS['work_type'];
+    $work_status = $GLOBALS['work_status'];
+
+    echo "<tr>";
+    foreach ($el as $key => $cell) {
+        switch ($key) {
+            case "id":
+                $id = $cell;
+            case "targetname":
+            case "subsys_exemplar":
+            case "avail":
+                break;
+            case "ciname":
+                if (empty($cell))
+                    echo "<td>Для ТР{$id} нет затронутых КЭ</td>";
+                else
+                    echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a></td>";
+                break;
+            case "region":
+                if ($GLOBALS['cur_reg'] == '000')
+                    echo "<td>" . $cell . "</td>";
+                break;
+            case "environment":
+                if ($GLOBALS['PTK'] == AIS_1 or $GLOBALS['PTK'] == AIS_2)
+                    echo "<td>" . $cell . "</td>";
+                break;
+            case "start":
+                $start = $cell;
+            case "end":
+                $end = $cell;
+                echo "<td>" . (empty($cell) ? 'не запланировано' : date('d.m.Y H:i', $cell)) . "</td>";
+                break;
+            case "start_vis":
+            case "end_vis":
+                break;
+            case "down_time":
+                echo "<td>";
+                if (!empty($end)) {
+                    $sec = $end - $start;
+                    $h = floor($sec / 3600);
+                    $m = floor($sec / 60) - $h * 60;
+                    echo ($h > 0 ? $h . " ч " : "") . (strlen($m) < 2 ? "0" : "") . $m . " мин";
+                } else
+                    echo "---";
+                echo "</td>";
+                break;
+            case "bl_type":
+                echo "<td>" . $work_type[$cell] . "</td>";
+                break;
+            case "status":
+                echo "<td>" . $work_status[$cell] . "</td>";
+                break;
+            default:
+                echo "<td>" . $cell . "</td>";
+                break;
+        }
+    }
+    echo "</tr>";
+}
+
 ?>
 </body>
 </html>

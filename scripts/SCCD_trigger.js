@@ -249,3 +249,8 @@ $(function() {
         }
     });
 });
+
+// прокручивание тела таблицы
+$(function() {
+    $("table.sticky").stickyTableHeaders();
+});

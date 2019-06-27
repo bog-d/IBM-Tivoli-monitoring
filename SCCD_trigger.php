@@ -12,6 +12,7 @@ header('Content-Type: text/html;charset=UTF-8');
 	<link href="css/style.css" type="text/css" rel="stylesheet">
     <title>Настройка интеграции с СТП</title>
 	<script src="scripts/jquery-3.2.1.min.js"></script>
+    <script src="scripts/jquery.stickytableheaders.min.js"></script>
     <script src="scripts/common.js"></script>
     <script src="scripts/SCCD_trigger.js"></script>
 </head>
@@ -1648,8 +1649,8 @@ header('Content-Type: text/html;charset=UTF-8');
     else {
         $row_count = 0;
         echo "<h4 class='table_loc_toggle'>Показать/скрыть таблицу (количество строк: " . $count_service_model . ")</h4>";
-        echo "<table".($count_service_model > MIN_STRINGS_TO_HIDE_TABLE ? " class='loc_hide" : " class='loc_show")."' border='1' cellspacing='0' cellpadding='5'>";
-        echo "<tr>";
+        echo "<table class='".($count_service_model > MIN_STRINGS_TO_HIDE_TABLE ? 'loc_hide' : 'loc_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
+        echo "<thead><tr>";
             foreach ($table_N1_titles as $n => $title)
                 if ($multi_scheme or $n > 0) {
                     echo "<th>" . $title;
@@ -1659,7 +1660,7 @@ header('Content-Type: text/html;charset=UTF-8');
                         echo "<br><input type='button' class='gantt_font' onClick=\"select_all('chkbx_del', '1');\" title='Отметить все чекбоксы в столбце' value='выбрать'>&nbsp;<input type='button'class='gantt_font' onClick=\"select_all('chkbx_del', '0');\" title='Снять отметку со всех чекбоксов в столбце' value='очистить'>";
                     echo "</th>";
                 }
-        echo "</tr>";
+        echo "</tr></thead><tbody>";
 
         // each service data output
         foreach ($table_N1_data as $row) {
@@ -1743,7 +1744,7 @@ header('Content-Type: text/html;charset=UTF-8');
                     &emsp;<button class='btn_admin' type="submit" class="btn" name="formId[sendRequest]" onclick="return (confirm('Операция будет доступна только с первой из выбранных строк!') && checkCookie())" value="Клонировать" <?php echo $acs_role == 'admin' ? '' : "disabled='disabled'"; ?> title="Редактировать, клонировать, удалить одиночную запись из PFR_LOCATIONS"><img src="images/edit.png" hspace="5"><img src="images/copy.png" hspace="5"><img src="images/delete.png" hspace="5"></button><?php
                 echo "</td>";
             echo "</tr>";
-        echo "</table>";
+        echo "</tbody></table>";
     }
     echo "<br \>";
     echo "<br \>";
@@ -1902,9 +1903,9 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "Данные не найдены";
     else {
         echo "<h4 class='table_sit_toggle'>Показать/скрыть таблицу (количество строк: ".$count_table_cells.")</h4>";
-        echo "<table id='sit_filt' ".($count_table_cells > MIN_STRINGS_TO_HIDE_TABLE ? " class='sit_hide" : " class='sit_show")."' border=\"1\" cellspacing=\"0\" cellpadding=\"5\">";
+        echo "<table id='sit_filt' class='".($count_table_cells > MIN_STRINGS_TO_HIDE_TABLE ? 'sit_hide' : 'sit_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
             // table titles
-            echo "<tr>";
+            echo "<thead><tr>";
             foreach ($table_N2_titles as $cell) {
                 echo "<th>";
                     if ($cell == 'Генерация тестового события')	{
@@ -1984,7 +1985,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 echo "<td class=\"col_filter\"></td>";
                 echo "<td class=\"col_filter\"></td>";
                 echo "<td class=\"col_filter\"></td>";
-            echo "</tr>";
+            echo "</tr></thead><tbody>";
 
             // table data
             $i = 0;
@@ -2066,7 +2067,7 @@ header('Content-Type: text/html;charset=UTF-8');
                     ?><button class='btn_form' type="submit" name="formId[sendRequest]" onclick="return checkCookie()" value="Запустить все" title='Сгенерировать тестовые события для всех ситуаций' <?php echo $acs_form ? '' : "disabled='disabled'"; ?>/>Запустить все</button><?php
                 echo "</td>";
             echo "</tr>";
-        echo "</table>";
+        echo "</tbody></table>";
     }
     echo "<br \><br \>";
     ?><button class='btn_form' type="submit" name="formId[sendRequest]" class ="btn" onclick="return checkCookie()" value="Отправить все в очередь" title='Поставить тестовые события для всех ситуаций в очередь на исполнение' <?php echo $acs_form ? '' : "disabled='disabled'"; ?>/>Отправить сервис в очередь для генерации тестовых событий</button>
@@ -2096,11 +2097,11 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "Данные не найдены.<br \>";
     else {
         echo "<h4 class='table_ke_toggle'>Показать/скрыть таблицу (количество строк: ".$count_tors_info.")</h4>";
-        echo "<table".($count_tors_info > MIN_STRINGS_TO_HIDE_TABLE ? " class='ke_hide" : " class='ke_show")."' border=\"1\" cellspacing=\"0\" cellpadding=\"5\">";
-            echo "<tr>";
+        echo "<table class='".($count_tors_info > MIN_STRINGS_TO_HIDE_TABLE ? 'ke_hide' : 'ke_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
+            echo "<thead><tr>";
                 foreach ($table_N3_titles as $title)
                     echo "<th>".$title."</th>";
-            echo "</tr>";
+            echo "</tr></thead><tbody>";
 
             $row_count = 0;
             foreach ($table_N3_data as $row) {
@@ -2156,7 +2157,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 echo "<h4 class='table_ke_toggle'>Cкрыть таблицу</h4>";
             echo "</td>";
         echo "</tr>";
-        echo "</table>";
+        echo "</tbody></table>";
         echo "<br \>";
         echo "<br \>";		
     }
