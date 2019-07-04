@@ -22,6 +22,7 @@ if (isset($_POST['formId']['ref'])) {
     <link href="css/style.css" type="text/css" rel="stylesheet">
     <title>Работы по обслуживанию</title>
     <script src="scripts/jquery-3.2.1.min.js"></script>
+    <script src="scripts/jquery.stickytableheaders.min.js"></script>
     <script src="scripts/blackout.js"></script>
 </head>
 <body>
@@ -35,8 +36,9 @@ include 'functions/utime.php';
 
 // shift time (in hours) for operator's view
 const SHIFT  = 12;
-// "!" for the first position on sorting
-const AIS = "Автоматизированные информационные системы";
+// blocks
+const AIS_1 = "Автоматизированные информационные системы (основные КЭ)";
+const AIS_2 = "Автоматизированные информационные системы (неосновные КЭ)";
 // script work mode - operative or historical
 const OPER = 'oper';
 const HIST = 'hist';
@@ -45,6 +47,7 @@ const HIST = 'hist';
 
 // table titles
 $title_cells = array (
+        "",
         "Имя КЭ",
         "Код ОПФР",
         "Описание КЭ",
@@ -69,6 +72,8 @@ $table_intersection = [];
 $col_date_pre = array();
 // array of unique dates with works
 $col_date = array();
+// array of base KE
+$base_ke_arr = array();
 
 // work types
 $work_type = array (
@@ -119,7 +124,11 @@ $timestamp_current = time();
 // get script parameters
 $mode = isset($_GET['mode']) ? $_GET['mode'] : '';
 if (empty($mode) or (strcmp($mode, OPER) != 0 and strcmp($mode, HIST) != 0)) {
-    exit("<ul><li><h3><a href='blackout.php?mode=oper'>Оперативный график</a></h3></li>&emsp;&emsp;&emsp;выводится информация о технологических работах за 12 ч до настоящего времени и 12 ч после<br><br><br><li><h3><a href='blackout.php?mode=hist'>Исторические графики</a></h3>&emsp;&emsp;&emsp;выводится информация о технологических работах за выбранную в календаре дату</li></ul>");
+    exit("<ul>
+        <li><h3><a href='blackout.php?mode=oper'>Оперативный график</a></h3></li>&emsp;&emsp;&emsp;
+        выводится информация о технологических работах за 12 ч до настоящего времени и 12 ч после<br><br><br>
+        <li><h3><a href='blackout.php?mode=hist'>Исторические графики</a></h3>&emsp;&emsp;&emsp;
+        выводится информация о технологических работах за выбранную в календаре дату</li></ul>");
 }
 $cur_reg = isset($_GET['reg']) ? $_GET['reg'] : '000';
 $offset = isset($_GET['offset']) ? $_GET['offset'] : 0;
@@ -192,32 +201,35 @@ echo "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\" bg
 echo "</table><br><br>";
 
 // record(s) selection from MAXIMO tables
-$sel = "SELECT CI.CINAME, 
-                   CI.ASSETLOCSITEID, 
-                   CI.DESCRIPTION AS CI_DESC, 
-                   (case when CI.CLASSSTRUCTUREID in $AIS_ke then '".AIS."' else C.SUBSYSTEM end) AS TARGETNAME, 
-                   C.NOTAVAILABLE, 
-                   C.STARTTIMECI, 
-                   C.ENDTIMECI, 
-                   C.FACTSTARTTIMECI, 
-                   C.FACTENDTIMECI, 
-                   B.DESCRIPTION AS BL_DESC, 
-                   B.WORKTYPE AS BL_TYPE, 
-                   B.STATUS,
-                   B.PMCHGBLACKOUTID,
-                   B.STARTTIME,
-                   B.ENDTIME,
-                   S.DESCRIPTION AS ENVIRONMENT
-            FROM MAXIMO.PMCHGBLACKOUT AS B 
-            LEFT JOIN MAXIMO.PMCHGBOCI AS C 
-            ON B.BLACKOUTNUM = C.BLACKOUTNUM AND C.ISTEMPLATE = 0
-            LEFT JOIN MAXIMO.CI AS CI
-            ON C.CINUM = CI.CINUM AND C.STARTTIMECI IS NOT NULL 
-            LEFT JOIN MAXIMO.SYNONYMDOMAIN AS S
-            ON S.MAXVALUE = CI.ENVIRONID AND S.DOMAINID = 'CIENVIRONSTAND' AND S.DEFAULTS = '1'
-            WHERE (B.STATUS = 'ACTIVE' OR B.STATUS = 'INPROG' OR B.STATUS = 'EXPIRED' OR B.STATUS = 'REG') AND
-                  (C.FACTSTARTTIMECI IS NOT NULL or B.STATUS = 'ACTIVE' OR B.STATUS = 'REG' OR B.STATUS = 'INPROG')
-            ORDER BY CI.ASSETLOCSITEID, (case when CI.CLASSSTRUCTUREID in $AIS_ke then '".AIS."' else C.SUBSYSTEM end), CI.CINAME ASC";
+$sel = "SELECT 
+           CI.CINAME, 
+           CI.ASSETLOCSITEID, 
+           CI.DESCRIPTION AS CI_DESC, 
+           (case when CI.CLASSSTRUCTUREID not in $AIS_ke then C.SUBSYSTEM else
+                case when C.SELECT1 = 1 then '".AIS_1."' else '".AIS_2."' end end) AS TARGETNAME, 
+           C.BLACKOUTNUM,
+           C.NOTAVAILABLE, 
+           C.STARTTIMECI, 
+           C.ENDTIMECI, 
+           C.FACTSTARTTIMECI, 
+           C.FACTENDTIMECI, 
+           B.DESCRIPTION AS BL_DESC, 
+           B.WORKTYPE AS BL_TYPE, 
+           B.STATUS,
+           B.PMCHGBLACKOUTID,
+           B.STARTTIME,
+           B.ENDTIME,
+           S.DESCRIPTION AS ENVIRONMENT
+        FROM MAXIMO.PMCHGBLACKOUT AS B 
+        LEFT JOIN MAXIMO.PMCHGBOCI AS C 
+        ON B.BLACKOUTNUM = C.BLACKOUTNUM AND C.ISTEMPLATE = 0
+        LEFT JOIN MAXIMO.CI AS CI
+        ON C.CINUM = CI.CINUM AND C.STARTTIMECI IS NOT NULL 
+        LEFT JOIN MAXIMO.SYNONYMDOMAIN AS S
+        ON S.MAXVALUE = CI.ENVIRONID AND S.DOMAINID = 'CIENVIRONSTAND' AND S.DEFAULTS = '1'
+        WHERE (B.STATUS = 'ACTIVE' OR B.STATUS = 'INPROG' OR B.STATUS = 'EXPIRED' OR B.STATUS = 'REG') AND
+              (C.FACTSTARTTIMECI IS NOT NULL or B.STATUS = 'ACTIVE' OR B.STATUS = 'REG' OR B.STATUS = 'INPROG')
+        ORDER BY CI.ASSETLOCSITEID, CI.CINAME ASC";
 $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
 $result = db2_execute($stmt_SCCD);
 
@@ -247,6 +259,7 @@ while ($row = db2_fetch_assoc($stmt_SCCD)) {
             "ciname" => $row['CINAME'],
             "region" => $row['ASSETLOCSITEID'],
             "ci_desc" => $row['CI_DESC'],
+            "wonum" => $row['BLACKOUTNUM'],
             "avail" => $row['NOTAVAILABLE'],
             "environment" => $row['ENVIRONMENT'],
             "start" => utime($start_time),
@@ -265,6 +278,45 @@ while ($row = db2_fetch_assoc($stmt_SCCD)) {
     for ($i = mktime(0, 0, 0, $date_time_array['mon'], $date_time_array['mday'], $date_time_array['year']);
          $i < ($end_time == 0 ? time() : utime($end_time)); $i += 86400) {
         $col_date_pre[] = date('Y-m-d', $i);
+    }
+}
+
+// array sort by targetname (AIS_1 -> AIS_2 -> other -> empty)
+usort ($table_cells, function ($x, $y) {
+    if ($x['targetname'] == $y['targetname'])
+        return strcmp($x['ciname'], $y['ciname']);
+    else if ($x['targetname'] == AIS_1)
+        return -1;
+    else if ($y['targetname'] == AIS_1)
+        return 1;
+    else if ($x['targetname'] == AIS_2)
+        return -1;
+    else if ($y['targetname'] == AIS_2)
+        return 1;
+    else if ($x['targetname'] == '')
+        return 1;
+    else if ($y['targetname'] == '')
+        return -1;
+    else
+        return strcmp($x['targetname'], $y['targetname']);
+});
+
+// base KE array
+foreach ($table_cells as $ke) {
+    if ($ke['targetname'] == AIS_1) {
+        $sel = "select distinct c2.CINAME, c2.BLACKOUTNUM
+                from MAXIMO.PMCHGBOCI c1
+                inner join MAXIMO.PMCHGBOCI c2 
+                on c2.SELECT1 = 0 and c2.PARENTCI is not null and c2.PARENTCI = c1.CINAME and c2.BLACKOUTNUM = c1.BLACKOUTNUM
+                where c1.SELECT1 = 1 and c1.CINAME = '{$ke['ciname']}'";
+        $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
+        $result = db2_execute($stmt_SCCD);
+
+        while ($row = db2_fetch_assoc($stmt_SCCD)) {
+            if (in_array($row['CINAME'], array_column($table_cells, 'ciname'))) {
+                $base_ke_arr[$row['BLACKOUTNUM']][$ke['ciname']][] = $row['CINAME'];
+            }
+        }
     }
 }
 
@@ -391,9 +443,14 @@ $ptk_count = 0;
 $ke_count = 0;
 $ptk_arr = array_unique(array_column($table_cells, 'targetname'));
 asort($ptk_arr);
-if (($k = array_search(AIS, $ptk_arr)) !== false ) {
+// add some elements to begin or end of PTK's array
+if (($k = array_search(AIS_2, $ptk_arr)) !== false ) {
     unset($ptk_arr[$k]);
-    array_unshift($ptk_arr, AIS);
+    array_unshift($ptk_arr, AIS_2);
+}
+if (($k = array_search(AIS_1, $ptk_arr)) !== false ) {
+    unset($ptk_arr[$k]);
+    array_unshift($ptk_arr, AIS_1);
 }
 if (($k = array_search('Н/Д', $ptk_arr)) !== false ) {
     unset($ptk_arr[$k]);
@@ -404,9 +461,15 @@ if (($k = array_search('', $ptk_arr)) !== false ) {
     $ptk_arr[] = 'КЭ без определённой зависимости';
 }
 
+$block_title_not_typed = true;
 foreach ($ptk_arr as $k => $PTK) {
-    if ($PTK == AIS)
-        echo "<h2 align='center'>".AIS."</h2>";
+    // block title
+    if ($PTK == AIS_1 or $PTK == AIS_2)
+        echo "<h2 align='center'>{$PTK}</h2>";
+    else if ($block_title_not_typed) {
+        echo "<h2 align='center'>Конфигурационные элементы</h2>";
+        $block_title_not_typed = false;
+    }
 
     // count KE in PTK to show or hide the block
     $i = 0;
@@ -417,11 +480,12 @@ foreach ($ptk_arr as $k => $PTK) {
         continue;
 
     $ptk_count++;
-    if ($PTK != AIS)
+    if ($PTK != AIS_1 and $PTK != AIS_2)
         $ke_count++;
 
     // PTK name output
-    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10150;&nbsp;".($PTK == AIS ? 'АИС' : $PTK)." (показать/скрыть)</h4>";
+    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10150;&nbsp;".
+        (($PTK == AIS_1 or $PTK == AIS_2) ? substr(explode('(', $PTK)[1], 0, -1)  : $PTK)." (показать/скрыть)</h4>";
     echo "<table class='blackout_PTK_{$k}' width='100%'><tr><td>";
 
     // Gantt chart
@@ -431,10 +495,10 @@ foreach ($ptk_arr as $k => $PTK) {
             echo "<td valign=\"top\" width='80%'>";
                 echo "<table class=\"gantt\" cellspacing=\"0\" cellpadding=\"2\" width='100%'>";
                     echo "<tr>";
-                        echo "<th colspan = 99>Диаграмма работ по обслуживанию</th>";
+                        echo "<th colspan = ".($PTK ==AIS_1 ? '100' : '99').">Диаграмма работ по обслуживанию</th>";
                     echo "</tr>";
                     echo "<tr>";
-                        echo "<th colspan = 2></th>";
+                        echo "<th colspan = ".($PTK ==AIS_1 ? '3' : '2')."></th>";
                             for ($i = (($mode == OPER) ? ($hours_current - SHIFT) : 0); $i < (($mode == OPER) ? ($hours_current + SHIFT) : 24); $i++) {
                                 echo "<td colspan = 4 class=\"gantt gantt_font\">";
                                 $pp = str_pad($i < 0 ? $i + 24 : ($i > 23 ? $i - 24 : $i), 2, "*", STR_PAD_LEFT);
@@ -451,55 +515,25 @@ foreach ($ptk_arr as $k => $PTK) {
 
                         // target PTK
                         if ($row['targetname'] === $PTK and (empty($filter_env) or $filter_env == $row['environment'])) {
-                            echo "<tr>";
-                                $date_time_array = getdate($row['start_vis']);
-                                $start_hour = $date_time_array['hours'];
-                                $min_today = $date_time_array['minutes'];
-                                $date_time_array = getdate($row['end_vis']);
-                                $end_hour = $date_time_array['hours'];
-                                $end_min = $date_time_array['minutes'];
-                                if ($end_hour == 0 and $end_min ==0) { 			// midnight
-                                    $end_hour = 24;
-                                    $end_min = 0;
-                                }
-                                echo "<td class=\"gantt gantt_font\">&ensp;&ensp;".$row['ciname']."&ensp;&ensp;</td>";
-                                echo "<th class=\"gantt_font\">";
-                                echo ($row['start'] < $row['start_vis'] ? "<a title=\"начало работ ".date('d.m.Y H:i', $row['start'])."\">&#9668;</a>" : "");
-                                echo "</th>";
-                                    for ($c_start = $timestamp_vis_start; $c_start < $timestamp_vis_end; $c_start += 15*60) {
-                                        $c_end = $c_start + 15*60;
-
-                                        // additional class for cell filling
-                                        $to_fill = (($row['start'] < $c_start and ($row['end'] > $c_start or $row['end'] == 0)) or
-                                            ($row['start'] >= $c_start and $row['start'] < $c_end));
-
-                                        // additional class for cell borders
-                                        $left_border = false;
-                                        $right_border = false;
-                                        foreach ($table_intersection as $value) {
-                                            if ($value['ciname'] == $row['ciname']) {
-                                                $left_border = ($to_fill and $value['start'] - $c_start >= 0 and $value['start'] - $c_start < 15*60);
-                                                $right_border = ($to_fill and $c_end - $value['end'] >= 0 and $c_end - $value['end'] < 15*60);
-                                            }
-                                        }
-
-                                        // hyperlink to SCCD
-                                        $link = "<a href='http://{$hostname_SCCD}/maximo/ui/login?event=loadapp&value=pmchgbo&additionalevent=useqbe&additionaleventvalue=PMCHGBLACKOUTID={$row['id']}&forcereload=true' title='Перейти к карточке работы в ТОРС...' target='_blank'>&nbsp;</a>";
-
-                                        // graph table cell draw
-                                        echo "<td class='gantt ".
-                                            ($left_border ? "gantt_left_border " : "").
-                                            ($right_border ? "gantt_right_border " : "").
-                                            ($to_fill ? "{$gantt_chart_colors[($row['status'] == 'EXPIRED' ? 'CLOSED' : $row['avail']."#".$row['bl_type'])][0]}'>{$link}" : "'>&nbsp;").
-                                            "</td>";
+                            // non-base KE
+                            $base_ke = '';
+                            if ($PTK == AIS_2) {
+                                foreach ($base_ke_arr[$row['wonum']] as $key => $val)
+                                    if (in_array($row['ciname'], $val)) {
+                                        $base_ke = 'Основной КЭ: ' . $key;
+                                        break;
                                     }
-                                echo "<th class=\"gantt_font\">";
-                                    if ($row['end'] == 0)
-                                        echo "<a title=\"окончание работ не запланировано\">&#9658;</a>";
-                                    else if ($row['end'] > $row['end_vis'])
-                                        echo "<a title=\"окончание работ ".date('d.m.Y H:i', $row['end'])."\">&#9658;</a>";
-                                echo "</th>";
-                            echo "</tr>";
+                            }
+
+                            graph_output($row, true, $PTK == AIS_1, $row['id'], $base_ke);
+                            // non-base KEs for the base KE
+                            if ($PTK == AIS_1) {
+                                foreach ($table_cells as $row_2)
+                                    if (empty($filter_env) or $filter_env == $row_2['environment'])
+                                        if ($row_2['targetname'] == AIS_2 and key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
+                                            in_array($row_2['ciname'], $base_ke_arr[$row['wonum']][$row['ciname']]) and $row['wonum'] == $row_2['wonum'])
+                                            graph_output($row_2, false, false, $row['id'], $base_ke);
+                            }
                         }
                     }
                 echo "</table>";
@@ -528,22 +562,23 @@ foreach ($ptk_arr as $k => $PTK) {
     echo "</table>";
 
     // KE table titles
-    echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width='80%'>";
-    echo "<tr>";
+    echo "<br><table class='sticky' border='1' cellspacing='0' cellpadding='5' width='80%'>";
+    echo "<thead><tr>";
     foreach ($title_cells as $title_row) {
-        if (($title_row != 'Код ОПФР' or $cur_reg == '000') and ($title_row != 'Среда' or $PTK ==AIS)) {
+        if (($title_row != 'Код ОПФР' or $cur_reg == '000') and ($title_row != 'Среда' or $PTK ==AIS_1 or $PTK ==AIS_2) and ($title_row != '' or $PTK ==AIS_1)) {
             echo "<th>".$title_row."</th>";
         }
     }
     echo "</tr>";
 
-    // AIS table filters
-    if ($PTK ==AIS) {
+    // AISs table filters
+    if ($PTK == AIS_1 or $PTK ==AIS_2) {
         echo "<tr>";
         ?> <form action="<?php echo $_SERVER['PHP_SELF'];?>?mode=<?php echo $mode;?>&reg=<?php echo $cur_reg;?>&auto_refresh=<?php echo $auto_refresh ? $ref_yes : $ref_no;?>&date_range=<?php echo $selected_date;?>&offset=<?php echo $offset;?>" method="post" id="filterId"> <?php
-            echo "<td class=\"col_filter\" colspan='".($cur_reg == '000' ? 3 : 2)."'></td>";
+            $colspan = ($PTK == AIS_1 ? ($cur_reg == '000' ? 4 : 3) : ($cur_reg == '000' ? 3 : 2));
+            echo "<td class=\"col_filter\" colspan=\"{$colspan}\"></td>";
             echo "<td class=\"col_filter\">";
-            $env_array = array_filter(array_unique(array_column(array_filter($table_cells, function($rec) { return $rec['targetname'] == AIS; }), 'environment')));
+            $env_array = array_filter(array_unique(array_column(array_filter($table_cells, function($rec) { return ($rec['targetname'] == AIS_1 or $rec['targetname'] == AIS_2); }), 'environment')));
             asort($env_array);
             ?> <select name="env" size="1">
                 <option value="">(нет фильтра)</option> <?php
@@ -560,73 +595,29 @@ foreach ($ptk_arr as $k => $PTK) {
         echo "</tr>";
     }
 
+    echo "</thead><tbody>";
     // KE output
     foreach ($table_cells as $row) {
-        if ($row['targetname'] === $PTK and (empty($filter_env) or $filter_env == $row['environment'])) {
-            echo "<tr>";
-            foreach ($row as $key => $cell) {
-                switch ($key) {
-                    case "id": $id = $cell;
-                    case "targetname":
-                    case "subsys_exemplar":
-                    case "avail":
-                        break;
-                    case "ciname":
-                        if (empty($cell))
-                            echo "<td>Для ТР{$id} нет затронутых КЭ</td>";
-                        else
-                            echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=".$cell."\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">".$cell."</a></td>";
-                        break;
-                    case "region":
-                        if ($cur_reg == '000')
-                            echo "<td>".$cell."</td>";
-                        break;
-                    case "environment":
-                        if ($PTK == AIS)
-                            echo "<td>".$cell."</td>";
-                        break;
-                    case "start":
-                        $start = $cell;
-                    case "end":
-                        $end = $cell;
-                        echo "<td>".(empty($cell) ? 'не запланировано' : date('d.m.Y H:i', $cell))."</td>";
-                        break;
-                    case "start_vis":
-                    case "end_vis":
-                        break;
-                    case "down_time":
-                        echo "<td>";
-                        if (!empty($end)) {
-                            $sec = $end - $start;
-                            $h = floor($sec / 3600);
-                            $m = floor($sec / 60) - $h * 60;
-                            echo ($h > 0 ? $h." ч " : "").(strlen($m) < 2 ? "0" : "").$m." мин";
-                        }
-                        else
-                            echo "---";
-                        echo "</td>";
-                        break;
-                    case "bl_type":
-                        echo "<td>".$work_type[$cell]."</td>";
-                        break;
-                    case "status":
-                        echo "<td>".$work_status[$cell]."</td>";
-                        break;
-                    default:
-                        echo "<td>".$cell."</td>";
-                        break;
+        if ((empty($filter_env) or $filter_env == $row['environment'])) {
+            if ($row['targetname'] === $PTK) {
+                table_output($row, true, $PTK == AIS_1, $row['id']);
+                // non-base KEs for the base KE
+                if ($PTK == AIS_1) {
+                    foreach ($table_cells as $row_2)
+                        if (empty($filter_env) or $filter_env == $row_2['environment'])
+                            if ($row_2['targetname'] == AIS_2 and key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
+                                in_array($row_2['ciname'], $base_ke_arr[$row['wonum']][$row['ciname']]) and $row['wonum'] == $row_2['wonum'])
+                                table_output($row_2, false, false, $row['id']);
                 }
             }
-            echo "</tr>";
         }
     }
-    echo "</table>";
-    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10149;&nbsp;".($PTK == AIS ? 'АИС' : $PTK)." (показать/скрыть)</h4>";
+    echo "</tbody></table>";
+    echo "<h4 class='blackout_PTK_toggle' id='{$k}' title='Нажмите, чтобы показать/скрыть блок этого КЭ'>&#10149;&nbsp;".
+        (($PTK == AIS_1 or $PTK == AIS_2) ? substr(explode('(', $PTK)[1], 0, -1) : $PTK)." (показать/скрыть)</h4>";
     echo "<br><br><br>";
 
     echo "</td></tr></table>";
-    if ($PTK == AIS)
-        echo "<h2 align='center'>Конфигурационные элементы</h2>";
 }
 
 if (empty($ptk_count) or empty($ke_count))
@@ -636,6 +627,139 @@ echo "<br \>";
 
 // database connections close
 db2_close($connection_SCCD);
+
+/******************************************************************************************************/
+
+function table_output($el, $show, $expand, $pmchgbociid) {
+    $id = $start = '';
+    $work_type = $GLOBALS['work_type'];
+    $work_status = $GLOBALS['work_status'];
+
+    echo "<tr ".(($expand or $show) ? "" : "class='nonbase_{$pmchgbociid}'").($show ? "" : " hidden").">";
+        if ($expand)
+            echo "<td class='expand pointer' id='{$pmchgbociid}'><img class='i{$pmchgbociid}' src='images/details_open.png' title='Развернуть' /></td>";
+        else if (!$show)
+            echo "<td></td>";
+
+        foreach ($el as $key => $cell) {
+            switch ($key) {
+                case "id":
+                    $id = $cell;
+                case "wonum":
+                case "targetname":
+                case "subsys_exemplar":
+                case "avail":
+                    break;
+                case "ciname":
+                    if (empty($cell))
+                        echo "<td>Для ТР{$id} нет затронутых КЭ</td>";
+                    else
+                        echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a></td>";
+                    break;
+                case "region":
+                    if ($GLOBALS['cur_reg'] == '000')
+                        echo "<td>" . $cell . "</td>";
+                    break;
+                case "environment":
+                    if ($GLOBALS['PTK'] == AIS_1 or $GLOBALS['PTK'] == AIS_2)
+                        echo "<td>" . $cell . "</td>";
+                    break;
+                case "start":
+                    $start = $cell;
+                case "end":
+                    $end = $cell;
+                    echo "<td>" . (empty($cell) ? 'не запланировано' : date('d.m.Y H:i', $cell)) . "</td>";
+                    break;
+                case "start_vis":
+                case "end_vis":
+                    break;
+                case "down_time":
+                    echo "<td>";
+                    if (!empty($end)) {
+                        $sec = $end - $start;
+                        $h = floor($sec / 3600);
+                        $m = floor($sec / 60) - $h * 60;
+                        echo ($h > 0 ? $h . " ч " : "") . (strlen($m) < 2 ? "0" : "") . $m . " мин";
+                    } else
+                        echo "---";
+                    echo "</td>";
+                    break;
+                case "bl_type":
+                    echo "<td>" . $work_type[$cell] . "</td>";
+                    break;
+                case "status":
+                    echo "<td>" . $work_status[$cell] . "</td>";
+                    break;
+                default:
+                    echo "<td>" . $cell . "</td>";
+                    break;
+            }
+        }
+    echo "</tr>";
+}
+
+/******************************************************************************************************/
+
+function graph_output($el, $show, $expand, $pmchgbociid, $base_ke)
+{
+    echo "<tr ".(($expand or $show) ? "" : "class='nonbase_{$pmchgbociid}'").($show ? "" : " hidden").">";
+        $date_time_array = getdate($el['start_vis']);
+        $start_hour = $date_time_array['hours'];
+        $min_today = $date_time_array['minutes'];
+        $date_time_array = getdate($el['end_vis']);
+        $end_hour = $date_time_array['hours'];
+        $end_min = $date_time_array['minutes'];
+        if ($end_hour == 0 and $end_min == 0) {            // midnight
+            $end_hour = 24;
+            $end_min = 0;
+        }
+    
+        // base KE
+        if ($expand)
+            echo "<td class='gantt gantt_font expand pointer' id='{$pmchgbociid}'><img class='i{$pmchgbociid}' src='images/details_open.png' title='Развернуть' /></td>";
+        else if (!$show)
+            echo "<td></td>";
+
+        echo "<td class=\"gantt gantt_font\">&ensp;&ensp;" .
+            (!empty($base_ke) ? "<span class='pointer' title='{$base_ke}'>" : "") . $el['ciname'] . (!empty($base_ke) ? "</span>" : "") . "&ensp;&ensp;</td>";
+        echo "<th class=\"gantt_font\">";
+        echo($el['start'] < $el['start_vis'] ? "<a title=\"начало работ " . date('d.m.Y H:i', $el['start']) . "\">&#9668;</a>" : "");
+        echo "</th>";
+        for ($c_start = $GLOBALS['timestamp_vis_start']; $c_start < $GLOBALS['timestamp_vis_end']; $c_start += 15 * 60) {
+            $c_end = $c_start + 15 * 60;
+    
+            // additional class for cell filling
+            $to_fill = (($el['start'] < $c_start and ($el['end'] > $c_start or $el['end'] == 0)) or
+                ($el['start'] >= $c_start and $el['start'] < $c_end));
+    
+            // additional class for cell borders
+            $left_border = false;
+            $right_border = false;
+            foreach ($GLOBALS['table_intersection'] as $value) {
+                if ($value['ciname'] == $el['ciname']) {
+                    $left_border = ($to_fill and $value['start'] - $c_start >= 0 and $value['start'] - $c_start < 15 * 60);
+                    $right_border = ($to_fill and $c_end - $value['end'] >= 0 and $c_end - $value['end'] < 15 * 60);
+                }
+            }
+    
+            // hyperlink to SCCD
+            $link = "<a href='http://{$GLOBALS['hostname_SCCD']}/maximo/ui/login?event=loadapp&value=pmchgbo&additionalevent=useqbe&additionaleventvalue=PMCHGBLACKOUTID={$el['id']}&forcereload=true' title='Перейти к карточке работы в ТОРС...' target='_blank'>&nbsp;</a>";
+    
+            // graph table cell draw
+            echo "<td class='gantt " .
+                ($left_border ? "gantt_left_border " : "") .
+                ($right_border ? "gantt_right_border " : "") .
+                ($to_fill ? "{$GLOBALS['gantt_chart_colors'][($el['status'] == 'EXPIRED' ? 'CLOSED' : $el['avail']."#".$el['bl_type'])][0]}'>{$link}" : "'>&nbsp;") .
+                "</td>";
+        }
+        echo "<th class=\"gantt_font\">";
+        if ($el['end'] == 0)
+            echo "<a title=\"окончание работ не запланировано\">&#9658;</a>";
+        else if ($el['end'] > $el['end_vis'])
+            echo "<a title=\"окончание работ " . date('d.m.Y H:i', $el['end']) . "\">&#9658;</a>";
+        echo "</th>";
+    echo "</tr>";
+}
 ?>
 </body>
 </html>

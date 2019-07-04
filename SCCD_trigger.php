@@ -1724,7 +1724,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 echo "</td>";
                 echo "<td align=\"center\">";
                     // Event list for all objects
-                echo "<a href=\"event_history_new.php?ServiceName=" . strtoupper($NODEID) . "&TimeRange=" . date("Y-m-d") . "\" target=\"_blank\">
+                echo "<a href=\"event_history_new.php?ServiceName=" . $NODEID . "&TimeRange=" . date("Y-m-d") . "\" target=\"_blank\">
                                         <img src=\"images/events.png\" title=\"Перейти к журналу событий ".($multi_scheme ? "подсистемы" : "индикатора")."\"></a>";
                 echo "</td>";
                 echo "<td align=\"center\" colspan='6'>";

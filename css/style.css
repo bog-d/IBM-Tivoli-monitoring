@@ -5,7 +5,10 @@ body {
 span {
 	margin-right: 5px;
 }
-.tree { 
+span.pointer {
+	cursor: pointer;
+}
+.tree {
 	max-width:50%;
 	min-width:300px; 
 	margin:0 auto; 
@@ -207,6 +210,9 @@ td.jq-cell-selected {
 td.not_active {
 	color: #000000;
 	cursor: default;
+}
+td.pointer {
+	cursor: pointer;
 }
 .select_in_form {
 	width: 58ch;
