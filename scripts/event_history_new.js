@@ -117,7 +117,7 @@ $(document).ready(function() {
             { data: "PFR_TSRM_WORDER",
                 render: function ( data, type, row ) {
                     return type === "display" && data != null ?
-                        '<a href=\'http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=:' + data +
+                        '<a href=\'http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=' + data +
                             '&amp;forcereload=true\' target=\'blank\' title=\'Перейти в СТП к РЗ...\'>' + data + '</a>' :
                         data;
                 },
