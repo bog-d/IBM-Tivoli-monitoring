@@ -12,7 +12,6 @@ header('Content-Type: text/html;charset=UTF-8');
 	<link href="css/style.css" type="text/css" rel="stylesheet">
     <title>Настройка интеграции с СТП</title>
 	<script src="scripts/jquery-3.2.1.min.js"></script>
-    <script src="scripts/jquery.stickytableheaders.min.js"></script>
     <script src="scripts/common.js"></script>
     <script src="scripts/SCCD_trigger.js"></script>
 </head>
@@ -1063,7 +1062,7 @@ header('Content-Type: text/html;charset=UTF-8');
         ob_flush();
         flush();
 
-        foreach (array_unique(array_filter($pfr_ke_tors)) as $ke_tors) {
+        foreach (array_filter($pfr_ke_tors) as $ke_tors) {
             $sel = "SELECT ci.CINAME, ci.STATUS, ci.ASSETLOCSITEID, cl.CLASSSTRUCTUREID, cl.FAILURECODE, cl.INCTYPEDESC, cl.DELAYMIN, str.CLASSIFICATIONID, str.DESCRIPTION, str.PERSONGROUP, p.DISPLAYNAME
                 FROM 
                     (SELECT CINUM, CINAME, STATUS, ASSETLOCSITEID FROM MAXIMO.CI WHERE CINAME = '" . $ke_tors['ke'] . "') AS ci
@@ -1102,7 +1101,6 @@ header('Content-Type: text/html;charset=UTF-8');
         $count_tors_info = count($table_N3_data);
         echo $count_tors_info . "<img src='images/ok.png' hspace='10'><br>";
     }
-
     if (!$light_scheme) {
         echo "Подготовка модели DOM...&emsp;";
         ob_flush();
@@ -1649,7 +1647,7 @@ header('Content-Type: text/html;charset=UTF-8');
     else {
         $row_count = 0;
         echo "<h4 class='table_loc_toggle'>Показать/скрыть таблицу (количество строк: " . $count_service_model . ")</h4>";
-        echo "<table class='".($count_service_model > MIN_STRINGS_TO_HIDE_TABLE ? 'loc_hide' : 'loc_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
+        echo "<table class='".($count_service_model > MIN_STRINGS_TO_HIDE_TABLE ? 'loc_hide' : 'loc_show')."' border='1' cellspacing='0' cellpadding='5'>";
         echo "<thead><tr>";
             foreach ($table_N1_titles as $n => $title)
                 if ($multi_scheme or $n > 0) {
@@ -1903,7 +1901,7 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "Данные не найдены";
     else {
         echo "<h4 class='table_sit_toggle'>Показать/скрыть таблицу (количество строк: ".$count_table_cells.")</h4>";
-        echo "<table id='sit_filt' class='".($count_table_cells > MIN_STRINGS_TO_HIDE_TABLE ? 'sit_hide' : 'sit_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
+        echo "<table id='sit_filt' class='".($count_table_cells > MIN_STRINGS_TO_HIDE_TABLE ? 'sit_hide' : 'sit_show')."' border='1' cellspacing='0' cellpadding='5'>";
             // table titles
             echo "<thead><tr>";
             foreach ($table_N2_titles as $cell) {
@@ -2097,7 +2095,7 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "Данные не найдены.<br \>";
     else {
         echo "<h4 class='table_ke_toggle'>Показать/скрыть таблицу (количество строк: ".$count_tors_info.")</h4>";
-        echo "<table class='".($count_tors_info > MIN_STRINGS_TO_HIDE_TABLE ? 'ke_hide' : 'ke_show')." sticky' border='1' cellspacing='0' cellpadding='5'>";
+        echo "<table class='".($count_tors_info > MIN_STRINGS_TO_HIDE_TABLE ? 'ke_hide' : 'ke_show')."' border='1' cellspacing='0' cellpadding='5'>";
             echo "<thead><tr>";
                 foreach ($table_N3_titles as $title)
                     echo "<th>".$title."</th>";
