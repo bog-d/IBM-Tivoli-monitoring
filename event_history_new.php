@@ -67,8 +67,8 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page
             $param = (isset($_GET["ServiceName"]) ? "ServiceName={$_GET["ServiceName"]}&" : "") .
                      (isset($_GET["KE_OBJECT"]) ? "KE_OBJECT={$_GET["KE_OBJECT"]}&" : "") .
                      (isset($_GET["INCIDENT"]) ? "INCIDENT={$_GET["INCIDENT"]}&" : "");
-            echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br><br>";
-            echo "<a class='open_window' href='#' title='Справка по функционалу журнала событий'><img src='images/help.png' hspace='5' height='24' width='24' align='middle' title='Справка по функционалу'>Справка</a>";
+            echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br>";
+            echo "<a class='open_window' href='#' title='Справка по функционалу журнала событий'><img src='images/help.png' hspace='5' height='24' width='24' align='middle' title='Справка по функционалу'>Справка по новой версии</a>";
         echo "</td>";
     echo "</tr>";
     echo "<tr>";
@@ -81,7 +81,9 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page
         echo "<td align='center'>";
         echo "</td>";
     echo "</tr>";
-echo "</table><br><br>";
+echo "</table>";
+
+echo "<p align='right'><a id='excel' href='' title='Экспорт таблицы в файл MS Excel' target='_blank'><img src='images/xls.png' align='middle' hspace='10' width='24' height='24'>Экспорт в Excel</a></p>";
 
 echo "<table id='events' class='display compact hover' width='100%'>";
     echo "<thead>";

@@ -125,7 +125,7 @@ $(document).ready(function() {
                 orderable: false
             }
         ],
-        fnRowCallback: function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+        fnRowCallback: function(nRow, aData) {
             if (aData['SAMPLED_SIT']) {
                 if (aData['SIT_IN_COLLECTION'])
                     $('td#chart', nRow).html('<a id="cell_pfr_sit_name" href=\'#\'><img src="images/chart.png" align="top" hspace="10" width="24" height="24" title="Показать график..."></a>');
@@ -153,7 +153,13 @@ $(document).ready(function() {
             if (aData["PFR_TSRM_CLASS"].indexOf('Выкл.') == 0 || aData["PFR_TSRM_CLASS"].indexOf('Тест') == 0)
                     $('td.cell_tsrm_class', nRow).attr('class', 'blue_status');
         },
-        initComplete: function () {
+        drawCallback: function(settings) {
+            // sql query for export to excel
+            var api = this.api();
+            $('a#excel').attr('href', 'http://10.103.0.60/pfr_other/event_history_excel.php?sql=' + JSON.stringify(api.ajax.json(), ['options']));
+        },
+        initComplete: function (settings, json) {
+            // lists filters
             this.api().columns().every( function () {
                 var column = this;
                 var select = $('select', this.footer());
