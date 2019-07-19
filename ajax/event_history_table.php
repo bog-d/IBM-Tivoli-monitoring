@@ -113,14 +113,13 @@ if (!empty($_POST)) {
     while ($row = db2_fetch_assoc($stmt_WHFED))
         $sev_arr[] = $row['SEVERITY'];*/
 
-    $sql = "select row_number() over ( order by ".array_keys($fields)[$_POST['order'][0]['column']]." ".$_POST['order'][0]['dir'].") AS N, 
-                      ID, WRITETIME, FIRST_OCCURRENCE, SERIAL, PFR_TORG, NODE, PFR_OBJECT, PFR_KE_TORS, PFR_SIT_NAME, DESCRIPTION, SEVERITY, TTNUMBER, PFR_TSRM_CLASS, CLASSIFICATIONID, CLASSIFICATIONGROUP, PFR_TSRM_WORDER
-              from DB2INST1.PFR_EVENT_HISTORY
-              where {$search_string}";
     $start_pos = $_POST['start'] + 1;
     $end_pos = $_POST['length'] == -1 ? 0 : ($_POST['start'] + $_POST['length']);
-    $sql_paged = "select * from ({$sql}) as t where ".(empty($end_pos) ? "t.N >= {$start_pos}" : "t.N between {$start_pos} and {$end_pos}");
-    $stmt_WHFED = db2_prepare($connection_WHFED, $sql_paged);
+    $sql = "select * from (select row_number() over ( order by ".array_keys($fields)[$_POST['order'][0]['column']]." ".$_POST['order'][0]['dir'].") AS N, 
+                      ID, WRITETIME, FIRST_OCCURRENCE, SERIAL, PFR_TORG, NODE, PFR_OBJECT, PFR_KE_TORS, PFR_SIT_NAME, DESCRIPTION, SEVERITY, TTNUMBER, PFR_TSRM_CLASS, CLASSIFICATIONID, CLASSIFICATIONGROUP, PFR_TSRM_WORDER
+                  from DB2INST1.PFR_EVENT_HISTORY
+                  where {$search_string}) as t where ".(empty($end_pos) ? "t.N >= {$start_pos}" : "t.N between {$start_pos} and {$end_pos}");
+    $stmt_WHFED = db2_prepare($connection_WHFED, $sql);
     $result_WHFED = db2_execute($stmt_WHFED);
 
     while ($row = db2_fetch_assoc($stmt_WHFED)) {
@@ -193,7 +192,7 @@ if (!empty($_POST)) {
         "recordsFiltered" => $recordsFiltered,
         "data" => $data_arr,
         "error" => $error,
-        "options" => json_encode($sql),
+        "options" => json_encode($_POST),
         "files" => array(),
     );
     echo json_encode($json_arr, JSON_PRETTY_PRINT);

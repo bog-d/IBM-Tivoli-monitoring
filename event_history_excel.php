@@ -1,12 +1,18 @@
 <?php
-if (!isset($_GET['sql']))
+/*
+	by GDV
+	2019 - RedSys
+*/
+if (!isset($_GET['data']))
     exit();
-if (empty(($sql_arr = json_decode($_GET['sql'], true))))
+if (empty(($data = json_decode($_GET['data'], true))))
     exit();
-if (!array_key_exists('options', $sql_arr))
+if (!array_key_exists('options', $data))
     exit();
-$sql = trim(str_replace("\\r\\n", " ", $sql_arr['options']), "\"");
+$data = json_decode($data['options'], true);
 
+
+require_once 'connections/TBSM.php';
 require_once 'connections/WHFED.php';
 require_once 'functions/tbsm.php';
 
@@ -41,13 +47,97 @@ $table_titles = array (
     "Группа классификации",
     "Номер РЗ",
 );
-
-$stmt_WHFED = db2_prepare($connection_WHFED, $sql);
-$result_WHFED = db2_execute($stmt_WHFED);
-
 foreach ($table_titles as $key => $col)
     $aSheet->setCellValueByColumnAndRow($key, 1, $col);
 $aSheet->getStyle('A1:N1')->applyFromArray($style_header);
+
+$fields = array (
+    '' => '',
+    'WRITETIME' => '',
+    'FIRST_OCCURRENCE' => '',
+    'SERIAL' => '',
+    'PFR_TORG' => '',
+    'NODE' => '',
+    'PFR_OBJECT' => '',
+    'PFR_KE_TORS' => '',
+    'PFR_SIT_NAME' => '',
+    'DESCRIPTION' => '',
+    'SEVERITY' => '',
+    'TTNUMBER' => '',
+    'PFR_TSRM_CLASS' => '',
+    'CLASSIFICATIONID' => '',
+    'CLASSIFICATIONGROUP' => '',
+    'PFR_TSRM_WORDER' => '',
+);
+
+$path_history = [ ];		// array for history tree from parents to childs
+$results = [ ];				// array for endpoint childs
+$search_arr[] = "1 = 1";
+
+if (!empty($data['search']['value'])) {
+    $sql = "select SERVICEINSTANCEID from TBSMBASE.SERVICEINSTANCE where SERVICEINSTANCENAME = '{$data['search']['value']}'";
+    $stmt_TBSM = db2_prepare($connection_TBSM, $sql);
+    $result_TBSM = db2_execute($stmt_TBSM);
+    $row = db2_fetch_assoc($stmt_TBSM);
+    if (empty($row['SERVICEINSTANCEID']))
+        $search_arr[] = "1 = 0";
+    else {
+        if (!ext_tree($row['SERVICEINSTANCEID'], $connection_TBSM, 0, $path_history))
+            $results[0]['service'] = $data['search']['value'];
+
+        $services_str = implode("', '", array_column($results, 'service'));
+
+        $sel_TBSM = "SELECT PFR_KE_TORS FROM DB2INST1.PFR_LOCATIONS WHERE SERVICE_NAME in ('{$services_str}')";
+        $stmt_TBSM = db2_prepare($connection_TBSM, $sel_TBSM);
+        $result_TBSM = db2_execute($stmt_TBSM);
+        while ($row = db2_fetch_assoc($stmt_TBSM))
+            $ke_obj[] = $row['PFR_KE_TORS'];
+
+        $ke_obj = array_unique($ke_obj);
+        $search_arr[] = "PFR_KE_TORS in ('".(implode("', '", $ke_obj))."')";
+    }
+}
+
+foreach($data['columns'] as $i) {
+    $field = $i['data'];
+    $search = $i['search']['value'];
+    if ($search != '')
+        if ($field == 'WRITETIME' or $field == 'FIRST_OCCURRENCE') {
+            list($start, $finish) = explode('*', $search);
+            if (empty($start))
+                $search_arr[] = "substr({$field}, 1, 10) <= '{$finish}'";
+            else if (empty($finish))
+                $search_arr[] = "substr({$field}, 1, 10) >= '{$start}'";
+            else
+                $search_arr[] = "substr({$field}, 1, 10) >= '{$start}' and substr({$field}, 1, 10) <= '{$finish}'";
+        }
+        else if ($field == 'SEVERITY')
+            $search_arr[] = "{$field} = {$search}";
+        else if ($field == 'PFR_TSRM_CLASS') {
+            if ($search == '0')
+                $search_arr[] = "({$field} = -1 or {$field} = 0)";
+            else if ($search == '2')
+                $search_arr[] = "({$field} = 1 or {$field} = 2)";
+            if ($search == '3')
+                $search_arr[] = "({$field} = 3 or {$field} = 4)";
+            else
+                $search_arr[] = "{$field} = {$search}";
+        }
+        else {
+            if (strpos($search, '^') === 0)
+                $search_arr[] = "{$field} = '".substr($search, 1)."'";
+            else
+                $search_arr[] = "{$field} like '%{$search}%'";
+        }
+}
+$search_string = implode(' and ', $search_arr);
+
+$sql = "select row_number() over ( order by ".array_keys($fields)[$data['order'][0]['column']]." ".$data['order'][0]['dir'].") AS N, 
+                      ID, WRITETIME, FIRST_OCCURRENCE, SERIAL, PFR_TORG, NODE, PFR_OBJECT, PFR_KE_TORS, PFR_SIT_NAME, DESCRIPTION, SEVERITY, TTNUMBER, PFR_TSRM_CLASS, CLASSIFICATIONID, CLASSIFICATIONGROUP, PFR_TSRM_WORDER
+                  from DB2INST1.PFR_EVENT_HISTORY
+                  where {$search_string}";
+$stmt_WHFED = db2_prepare($connection_WHFED, $sql);
+$result_WHFED = db2_execute($stmt_WHFED);
 
 $i = 0;
 while ($row = db2_fetch_assoc($stmt_WHFED)) {
@@ -128,5 +218,6 @@ $objWriter = new PHPExcel_Writer_Excel2007($pExcel);
 $objWriter->save('php://output');
 
 // databases connections close
+db2_close($connection_TBSM);
 db2_close($connection_WHFED);
 exit();

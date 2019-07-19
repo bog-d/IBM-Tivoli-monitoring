@@ -83,7 +83,7 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page
     echo "</tr>";
 echo "</table>";
 
-echo "<p align='right'><a id='excel' href='' title='Экспорт таблицы в файл MS Excel' target='_blank'><img src='images/xls.png' align='middle' hspace='10' width='24' height='24'>Экспорт в Excel</a></p>";
+echo "<p align='right'><a id='excel' href='#' title='Экспорт таблицы в файл MS Excel' target='_blank'><img src='images/xls.png' align='middle' hspace='10' width='24' height='24'>Экспорт в Excel</a></p>";
 
 echo "<table id='events' class='display compact hover' width='100%'>";
     echo "<thead>";

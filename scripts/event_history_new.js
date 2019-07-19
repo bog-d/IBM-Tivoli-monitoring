@@ -154,9 +154,9 @@ $(document).ready(function() {
                     $('td.cell_tsrm_class', nRow).attr('class', 'blue_status');
         },
         drawCallback: function(settings) {
-            // sql query for export to excel
+            // filters and data for export to excel
             var api = this.api();
-            $('a#excel').attr('href', 'http://10.103.0.60/pfr_other/event_history_excel.php?sql=' + JSON.stringify(api.ajax.json(), ['options']));
+            $('a#excel').attr('href', 'http://10.103.0.60/pfr_other/event_history_excel.php?data=' + JSON.stringify(api.ajax.json(), ['options']));
         },
         initComplete: function (settings, json) {
             // lists filters
@@ -190,7 +190,7 @@ $(document).ready(function() {
         },
         dom: 'lr<"rightimg"B><"rightimg"f>rtip',
         buttons: [
-            'colvis', 'copy', 'excel', 'print'
+            'colvis', 'copy', 'print'
         ],
         language: {
             "processing": "<font color='red'>Пожалуйста, подождите...</font><img src='images/inprogress.gif' hspace='10'>",
