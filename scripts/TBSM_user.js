@@ -54,6 +54,11 @@ function checkChecked() {
     return is_checked;
 }
 
+// выбор/отмена выбора всех чекбоксов в столбце
+function select_all(value) {
+    $('body input:checkbox').prop('checked', value);
+}
+
 // динамическая фильтрация строк в таблице по значению одного столбца
 function cell_filter() {
     $('table.tbsm_users tr.row_filtered').each(function () {

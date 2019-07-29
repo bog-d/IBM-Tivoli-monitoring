@@ -67,7 +67,6 @@
             $buffer = shell_exec("{$path_LDAP_sync}{$script_add_user_to_tbsm} \"{$category}|{$login}|{$displayname}|{$visibility}\"");
             $output = "{$output}Пользователь {$login} ({$displayname}) " . (strpos($buffer, "успешно добавлен") === false ? 'не ' : '') . "добавлен. ";
             $output = $output . "Данные об области видимости ".(rtrim(shell_exec("{$path_LDAP_sync}{$script_user_role_get_from_nco} insert {$login} {$visibility}")) == '(1 row affected)' ? '' : 'не ')."добавлены.<br>";
-
         }
         shell_exec($path_LDAP_sync.$script_get_nco_users);
     }
@@ -201,7 +200,10 @@
             <th>Полное имя</th>
             <th>Почта</th>
             <th>Область видимости</th>
-            <th><img src="images/new.png"></th>
+            <th>
+                <input type='button' class='gantt_font' onClick="select_all(1);" title='Отметить все чекбоксы в столбце' value='выбрать'>&nbsp;
+                <input type='button'class='gantt_font' onClick="select_all(0);" title='Снять отметку со всех чекбоксов в столбце' value='очистить'>
+            </th>
         </tr>
         <?php
         foreach ($ad_users_array as $login => $rec) {
