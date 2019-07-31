@@ -197,6 +197,9 @@ tr.new_records {
 tr.example_records {
 	color: #454545;
 }
+tr.pointer {
+	cursor: pointer;
+}
 .calendar td {
 	background: #ffffff !important;
 	color: #0000FF;

@@ -250,7 +250,21 @@ $(function() {
     });
 });
 
-// прокручивание тела таблицы
+// нажатие кнопки "Выгрузить" события мониторинга с временем жизни инцидентов более ... мин.
 $(function() {
-    $("table.sticky").stickyTableHeaders();
+    $('#inc_exp_btn').click(function(){
+        var node = $('#inc_exp_node').val();
+        var val = $('#inc_exp_val').val();
+        var val_int = parseInt(val, 10);
+
+        if (isNaN(val) || !val || val_int < 1)
+            alert("Недопустимое число: " + val);
+        else
+            window.open("http://10.103.0.60/pfr_other/event_history_incidents.php?ServiceName=" + node + "&Time=" + val_int);
+    });
 });
+
+// прокручивание тела таблицы
+// $(function() {
+//     $("table.sticky").stickyTableHeaders();
+// });

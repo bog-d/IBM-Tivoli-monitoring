@@ -1840,8 +1840,16 @@ header('Content-Type: text/html;charset=UTF-8');
         echo "</tr>";
         echo "</table>";
     }
-    echo "<br \>";
-    echo "<br \>";
+    echo "<br \><br \>";
+
+    // incidents list with given lifetime
+    echo "<input class='btn_form' type='button' class='btn' id='inc_exp_btn' value='Выгрузить' title='Экспорт в Excel'>
+          события мониторинга с временем жизни инцидентов более 
+          <input id='inc_exp_val' type='text' size='3' maxlength='4' title='Экспорт в Excel' value='15' required>
+          мин.
+          <input id='inc_exp_node' type='text' value='{$NODEID}' hidden>";
+
+    echo "<br \><br \>";
     echo "<hr>";
 
     // *********************************************************** TEMS ***********************************************************
