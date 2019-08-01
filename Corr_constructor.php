@@ -20,6 +20,9 @@ header('Content-Type: text/html;charset=UTF-8');
 require_once 'connections/TBSM.php';
 include 'functions/user_roles.php';
 
+// maximum value of the counter
+const MAX_COUNT = 5;
+
 $mode ='view';
 $new_chain_name = '';
 $chain_id = 0;
@@ -30,25 +33,66 @@ $error = false;
 
 // chain delete from DB
 if (isset($_POST["del_btn"])) {
-    $sel = "delete from DB2INST1.PFR_CORRELATION_DESCRIPTION where PFR_CORRELATION_CHAIN_ID = {$_POST['chain_id']}";
+    $sel = "delete from PFR_CORRELATION_CHAIN where ID = {$_POST['chain_id']}";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     if (!$error and !$result)
         $error = true;
 
-    $sel = "delete from DB2INST1.PFR_CORRELATIONS where PFR_CORRELATION_CHAIN_ID = {$_POST['chain_id']}";
+    $sel = "delete from PFR_CORRELATIONS where PFR_CORRELATION_CHAIN_ID = {$_POST['chain_id']}";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     if (!$error and !$result)
         $error = true;
 
-    $output = $error ? "При удалении цепочки с PFR_CORRELATION_CHAIN_ID = {$_POST['chain_id']} произошла ошибка!" :
-                        "Цепочка с PFR_CORRELATION_CHAIN_ID = {$_POST['chain_id']} успешно удалена.";
+    $output = $error ? "При удалении цепочки с ID = {$_POST['chain_id']} произошла ошибка!" :
+                        "Цепочка с ID = {$_POST['chain_id']} успешно удалена.";
 }
 
 // chain save to DB
 if (isset($_POST["save_btn"])) {
-    ;
+    // existing records
+    if (isset($_POST['list_ke'])) {
+        foreach ($_POST['list_ke'] as $key => $value) {
+            // save changes
+            if (!isset($_POST['chk_del']) or !array_key_exists($key, $_POST['chk_del'])) {
+                $sel = "update PFR_CORRELATIONS 
+                    set PFR_KE_TORS = '{$value}', PFR_SIT_NAME = '{$_POST['list_si'][$key]}', PFR_CORRELATION_EVENT_TYPE = '{$_POST['type_list'][$key]}' 
+                    where ID = {$key}";
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
+            } // delete record
+            else if (array_key_exists($key, $_POST['chk_del'])) {
+                $sel = "delete from PFR_CORRELATIONS where ID = {$key}";
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
+            }
+        }
+    }
+
+    $chain_id = $_POST['chain_id'];
+    // new chain
+    if ($chain_id == 0) {
+        $sel = "insert into PFR_CORRELATION_CHAIN (PFR_CORRELATION_CHAIN_DESCRIPTION)  
+                    values ('{$_POST['new_chain_name']}')";
+        $stmt = db2_prepare($connection_TBSM, $sel);
+        $result = db2_execute($stmt);
+
+        $chain_id = db2_last_insert_id($connection_TBSM);
+    }
+
+    // new records
+    if (isset($_POST['list_ke_new'])) {
+        foreach ($_POST['list_ke_new'] as $key => $value) {
+            // save changes if not to delete
+            if (!isset($_POST['chk_del_new']) or !array_key_exists($key, $_POST['chk_del_new'])) {
+                $sel = "insert into PFR_CORRELATIONS (PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE, PFR_CORRELATION_CHAIN_ID)  
+                    values ('{$value}', '{$_POST['list_si_new'][$key]}', '{$_POST['type_list_new'][$key]}', {$chain_id})";
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
+            }
+        }
+    }
 }
 
 // new chain
@@ -72,9 +116,9 @@ require 'functions/header_1.php';
 require 'functions/header_2.php';
 
 // list of chains
-$sel = "select d.PFR_CORRELATION_CHAIN_ID, d.PFR_CORRELATION_CHAIN_DESCRIPTION, c.PFR_KE_TORS, c.PFR_SIT_NAME
-        from PFR_CORRELATION_DESCRIPTION d, PFR_CORRELATIONS c
-        where d.PFR_CORRELATION_CHAIN_ID = c.PFR_CORRELATION_CHAIN_ID and c.PFR_CORRELATION_EVENT_TYPE = 'm'";
+$sel = "select d.ID, d.PFR_CORRELATION_CHAIN_DESCRIPTION, c.PFR_KE_TORS, c.PFR_SIT_NAME
+        from PFR_CORRELATION_CHAIN d, PFR_CORRELATIONS c
+        where d.ID = c.PFR_CORRELATION_CHAIN_ID and c.PFR_CORRELATION_EVENT_TYPE = 'm'";
 $stmt = db2_prepare($connection_TBSM, $sel);
 $result = db2_execute($stmt);
 
@@ -86,7 +130,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
         echo "</tr>";
         echo "<tr class='first'>";
             echo "<td valign='top'>";
-                echo "<table cellpadding='10' border='1'>";
+                echo "<table cellpadding='10' cellspacing='0' border='1'>";
                     echo "<tr>";
                         echo "<th>Имя</th>";
                         echo "<th>КЭ корневого события</th>";
@@ -94,7 +138,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
                     echo "</tr>";
 
                     while ($row = db2_fetch_assoc($stmt)) {
-                        echo "<tr class='rec_ch pointer' chain_id_sel='{$row['PFR_CORRELATION_CHAIN_ID']}'>";
+                        echo "<tr class='rec_ch pointer' chain_id_sel='{$row['ID']}'>";
                             echo "<td class='chain_descr'>{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}</td>";
                             echo "<td>{$row['PFR_KE_TORS']}</td>";
                             echo "<td>{$row['PFR_SIT_NAME']}</td>";
@@ -129,8 +173,8 @@ if ($mode == 'new')
     echo"<h3 align='center'>Добавление новой цепочки  \"{$new_chain_name}\"";
 else if ($mode == 'edit') {
     $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION
-            from PFR_CORRELATION_DESCRIPTION
-            where PFR_CORRELATION_CHAIN_ID = {$chain_id}";
+            from PFR_CORRELATION_CHAIN
+            where ID = {$chain_id}";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     $row = db2_fetch_assoc($stmt);
@@ -141,22 +185,23 @@ if ($mode != 'view') {
     echo "&emsp;<button type='submit' class='btn_blue' name='save_btn' value='Сохранить' title='Сохранить цепочку' " . ($acs_form ? '' : 'disabled') . " onclick=\"return confirm('Сохранить цепочку в БД?..')\"><img src='images/events.png' height='16' width='16'> Сохранить</button>";
     echo "&emsp;<button type='submit' class='btn_blue' name='cancel_btn' value='Отменить' title='Отменить и вернуться' " . ($acs_form ? '' : 'disabled') . " onclick=\"return confirm('Если были сделаны изменения, они будут утеряны!')\"><img src='images/details_close.png' height='16' width='16'> Отменить</button></h3>";
 }
+echo "<input name='chain_id' type='text' value='{$chain_id}' hidden>";
+echo "<input name='new_chain_name' type='text' value='{$new_chain_name}' hidden>";
 
-echo "<table border='1' cellpadding='10' align='center'>";
-    echo "<tr class='rec_hide' id='title'>";
-        echo "<th>Имя КЭ</th>";
-        echo "<th>Событие</th>";
-        echo "<th>Тип события</th>";
-    echo "</tr>";
+// view mode
+if ($mode == 'view') {
+    $sel = "select PFR_CORRELATION_CHAIN_ID, PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE
+            from PFR_CORRELATIONS
+            order by PFR_CORRELATION_EVENT_TYPE, ID asc";
+    $stmt = db2_prepare($connection_TBSM, $sel);
+    $result = db2_execute($stmt);
 
-    // view mode
-    if ($mode == 'view') {
-        $sel = "select PFR_CORRELATION_CHAIN_ID, PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE
-                from PFR_CORRELATIONS
-                order by PFR_CORRELATION_EVENT_TYPE, ID asc";
-        $stmt = db2_prepare($connection_TBSM, $sel);
-        $result = db2_execute($stmt);
-
+    echo "<table border='1' cellpadding='10' cellspacing='0' align='center'>";
+        echo "<tr class='rec_hide' id='title'>";
+            echo "<th>Имя КЭ</th>";
+            echo "<th>Событие</th>";
+            echo "<th>Тип события</th>";
+        echo "</tr>";
         while ($row = db2_fetch_assoc($stmt)) {
             echo "<tr class='rec_hide chain' chain_id_show='{$row['PFR_CORRELATION_CHAIN_ID']}'>";
                 echo "<td>{$row['PFR_KE_TORS']}</td>";
@@ -164,25 +209,103 @@ echo "<table border='1' cellpadding='10' align='center'>";
                 echo "<td align='center'>{$row['PFR_CORRELATION_EVENT_TYPE']}</td>";
             echo "</tr>";
         }
-    }
-    // edit or new mode
-    else {
-        $sel = "select PFR_CORRELATION_CHAIN_ID, PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE
-                from PFR_CORRELATIONS
-                where PFR_CORRELATION_CHAIN_ID = {$chain_id}
-                order by PFR_CORRELATION_EVENT_TYPE, ID asc";
-        $stmt = db2_prepare($connection_TBSM, $sel);
-        $result = db2_execute($stmt);
+    echo "</table>";
+}
+// edit or new mode
+else {
+    // KE array from TEMS
+    $sel = "select distinct PFR_KE_TORS
+            from PFR_TEMS_SIT_AGGR
+            where PFR_KE_TORS <> ''
+            order by PFR_KE_TORS asc";
+    $stmt = db2_prepare($connection_TBSM, $sel);
+    $result = db2_execute($stmt);
+    while ($row = db2_fetch_assoc($stmt))
+        $ke_arr[] = $row['PFR_KE_TORS'];
 
+    // situations array from TEMS
+    $sel = "select distinct SIT_NAME
+            from PFR_TEMS_SIT_AGGR
+            order by SIT_NAME asc";
+    $stmt = db2_prepare($connection_TBSM, $sel);
+    $result = db2_execute($stmt);
+    while ($row = db2_fetch_assoc($stmt))
+        $sit_arr[] = $row['SIT_NAME'];
+
+    // selected chain
+    $sel = "select ID, PFR_CORRELATION_CHAIN_ID, PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE
+            from PFR_CORRELATIONS
+            where PFR_CORRELATION_CHAIN_ID = {$chain_id}
+            order by PFR_CORRELATION_EVENT_TYPE, ID asc";
+    $stmt = db2_prepare($connection_TBSM, $sel);
+    $result = db2_execute($stmt);
+
+    echo "<table border='1' cellpadding='10' cellspacing='0' align='center'>";
+        echo "<tr id='title'>";
+            echo "<th>Имя КЭ</th>";
+            echo "<th>Событие</th>";
+            echo "<th>Тип события</th>";
+            echo "<th><img src='images/delete.png' title='Отметить звенья для удаления'></th>";
+        echo "</tr>";
         while ($row = db2_fetch_assoc($stmt)) {
-            echo "<tr class='rec_hide chain' chain_id_show='{$row['PFR_CORRELATION_CHAIN_ID']}'>";
-                echo "<td>{$row['PFR_KE_TORS']}</td>";
-                echo "<td>{$row['PFR_SIT_NAME']}</td>";
-                echo "<td align='center'>{$row['PFR_CORRELATION_EVENT_TYPE']}</td>";
+            echo "<tr class='chain'>";
+                echo "<td>";
+                    echo "<input name='input' type='text' size='40' maxlength='32' placeholder='поиск по подстроке' id='inp_ke_{$row['ID']}'><br/>";
+                    echo "<select size = '1' name = 'list_ke[{$row['ID']}]' id='sel_ke_{$row['ID']}'>";
+                        foreach ($ke_arr as $value)
+                            echo "<option value='{$value}' ".($value == $row['PFR_KE_TORS'] ? 'selected' : '').">{$value}</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td>";
+                    echo "<input name='input' type='text' size='40' maxlength='32' placeholder='поиск по подстроке' id='inp_si_{$row['ID']}'><br/>";
+                    echo "<select size = '1' name = 'list_si[{$row['ID']}]' id='sel_si_{$row['ID']}'>";
+                        foreach ($sit_arr as $value)
+                            echo "<option value='{$value}' ".($value == $row['PFR_SIT_NAME'] ? 'selected' : '').">{$value}</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td align='center'>";
+                    echo "<select name = 'type_list[{$row['ID']}]'>";
+                        echo "<option value ='m' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'selected' : '').">m</option>";
+                        echo "<option value ='s' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 's' ? 'selected' : '').">s</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td align='center'>";
+                    echo "<input type='checkbox' name='chk_del[{$row['ID']}]'>";
+                echo "</td>";
             echo "</tr>";
         }
-    }
-echo "</table>";
+
+        // new rows
+        for ($i = 1; $i <= MAX_COUNT; $i++) {
+            echo "<tr class='new_row new_records ".(($mode == 'new' and $i ==1) ? '' : 'rec_hide')."' id_new='{$i}'>";
+                echo "<td>";
+                    echo "<input name='input' type='text' size='40' maxlength='32' placeholder='поиск по подстроке' id='inp_ke_new_{$i}'><br/>";
+                    echo "<select size = '1' name = 'list_ke_new[{$i}]' id='sel_ke_new_{$i}'>";
+                    foreach ($ke_arr as $value)
+                        echo "<option value='{$value}'>{$value}</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td>";
+                    echo "<input name='input' type='text' size='40' maxlength='32' placeholder='поиск по подстроке' id='inp_si_new_{$i}'><br/>";
+                    echo "<select size = '1' name = 'list_si_new[{$i}]' id='sel_si_new_{$i}'>";
+                    foreach ($sit_arr as $value)
+                        echo "<option value='{$value}'>{$value}</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td align='center'>";
+                    echo "<select name = 'type_list_new[{$i}]'>";
+                        echo "<option value ='m'>m</option>";
+                        echo "<option value ='s' selected>s</option>";
+                    echo "</select>";
+                echo "</td>";
+                echo "<td align='center'>";
+                    echo "<input type='checkbox' name='chk_del_new[{$i}]' id='chk_new_{$i}' ".(($mode == 'new' and $i ==1) ? '' : 'checked').">";
+                echo "</td>";
+            echo "</tr>";
+        }
+    echo "</table>";
+    echo "<p align='center'><button type='button' class='btn_blue' name='add_btn' value='Добавить звено' title='Добавить звено в цепочку' " . ($acs_form ? '' : 'disabled') . "><img src='images/new.png' height='16' width='16'> Добавить звено</button></p>";
+}
 echo "</form>";
 
 // database connection close

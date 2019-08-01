@@ -84,5 +84,65 @@ function next_confirm() {
     }
 }
 
+// нажатие клавиши при вводе текста в строку поиска КЭ
+$(function() {
+    $('input[name=input]').keyup(function() {
+        var search_str = this.value.toUpperCase();
+        var id = $(this).attr("id").substr(4);
+        var conc = 0;
 
+        if (($('select[id=sel_' + id + ']').attr("disabled") == "disabled")) {
+            $('select[id=sel_' + id + '] option[value="-1"]').remove();
+            $('select[id=sel_' + id + ']').attr("disabled", false);
+        }
+
+        var i = true;
+        $('select[id=sel_' + id + '] option').each(function() {
+            this.selected = false;
+            if (this.text.indexOf(search_str) >= 0) {
+                $(this).toggle(true);
+                conc++;
+                if (i) {
+                    this.selected = true;
+                    i = false;
+                }
+            }
+            else {
+                $(this).toggle(false);
+            }
+        });
+
+        if (conc == 0) {
+            $('select[id=sel_' + id + ']').append($('<option value="-1" selected>Совпадений не найдено</option>'));
+            $('select[id=sel_' + id + ']').attr("disabled", true);
+        }
+    });
+});
+
+// нажатие кнопки "Добавить звено"
+$(function() {
+    $('button[name=add_btn]').click(function() {
+        var added = false;
+        var rest = false;
+
+        $('tr.new_row').each(function() {
+            if ($(this).hasClass("rec_hide") && !added) {
+                var id_new = $(this).attr("id_new");
+                $('#chk_new_' + id_new).prop('checked', false);
+
+                $(this).show(function () {
+                    $(this).animate({}, 2000);
+                });
+                $(this).removeClass("rec_hide");
+
+                added = true;
+            }
+            else if ($(this).hasClass("rec_hide") && added)
+                rest = true;
+        });
+
+        if (!rest)
+            $('button[name=add_btn]').prop('disabled', true);
+    });
+});
 
