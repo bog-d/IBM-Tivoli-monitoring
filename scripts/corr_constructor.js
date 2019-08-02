@@ -21,6 +21,37 @@ $(function() {
     });
 });
 
+// нажатие клавиши при вводе текста в строку поиска цепочки
+$(function() {
+    $('input[name=chain_search]').keyup(function() {
+        var search_str = this.value.toUpperCase();
+        var comp = false;
+
+        $('tr.rec_ch').each(function() {
+            comp = false;
+            $(this).find('td').each(function(){
+                if ($(this).text().toUpperCase().indexOf(search_str) >= 0)
+                    comp = true;
+            });
+
+            if (comp)
+                $(this).show();
+            else {
+                $(this).hide();
+
+                if ($(this).hasClass("new_records")) {
+                    $(this).removeClass("new_records");
+                    $('tr#title').hide();
+                    $('tr.chain').each(function() {
+                        $(this).hide();
+                    });
+                    $('#chain_id').val(null);
+                }
+            }
+        });
+    });
+});
+
 // подтверждение при удалении цепочки
 function del_confirm() {
     var chain_selected = $('#chain_id').val();
@@ -45,6 +76,50 @@ function edit_confirm() {
         alert('Выберите цепочку для редактирования!');
         return false;
     }
+}
+
+// подтверждение при сохранении цепочки
+function save_confirm() {
+    var m_number = 0;
+
+    $('select[id^=sel_type_]').each(function() {
+        if ($(this).val().localeCompare('m') == 0 && $(this).prop('disabled') == false)
+            m_number++;
+    });
+
+    if (m_number == 0) {
+        alert('Добавьте звено с типом события "m"!');
+        return false;
+    }
+    if (m_number > 1) {
+        alert('Допустимо только одно звено с типом события "m"!');
+        return false;
+    }
+    if (confirm('Сохранить цепочку в БД?..')) {
+        $.ajax({
+            type: "POST",
+            url: "ajax/corr_constructor_check_and_save.php",
+            data: $('form#formEdit').serialize(),
+            dataType: 'json',
+            beforeSend: function(){
+                $("#to_remove").text('Пожалуйста, подождите...');
+            },
+            success: function (data) {
+                $("#to_remove").text('');
+                if (data.check_status) {
+                    alert('Проверка на консистентность прошла успешно.\n\r' +
+                        (data.save_status ? 'Данные сохранены.' : 'При сохранении данных произошла ошибка!'));
+                    window.location.href = "http://10.103.0.60/pfr_other/Corr_constructor.php";
+                }
+                else
+                    alert('Проверка данных на консистентность не прошла!\n\r' + data.message);
+            },
+            error: function (req, text, error) {
+                $("#to_remove").text('Ошибка при проверке данных на консистентность! ' + text + ' | ' + error);
+            }
+        });
+    }
+    return false;
 }
 
 // нажатие кнопки "Создать новую"
@@ -128,6 +203,7 @@ $(function() {
         $('tr.new_row').each(function() {
             if ($(this).hasClass("rec_hide") && !added) {
                 var id_new = $(this).attr("id_new");
+                $('#sel_type_new_' + id_new).prop('disabled', false);
                 $('#chk_new_' + id_new).prop('checked', false);
 
                 $(this).show(function () {
@@ -146,3 +222,16 @@ $(function() {
     });
 });
 
+// отметка чек-бокса для удаления записи
+$(function() {
+    $('body input:checkbox').change(function() {
+        var id = $(this).attr("id").substr(4);
+
+        $('input[id=inp_ke_' + id + ']').prop('hidden', $(this).prop('checked'));
+        $('input[id=inp_si_' + id + ']').prop('hidden', $(this).prop('checked'));
+
+        $('select[id=sel_ke_' + id + ']').prop('disabled', $(this).prop('checked'));
+        $('select[id=sel_si_' + id + ']').prop('disabled', $(this).prop('checked'));
+        $('select[id=sel_type_' + id + ']').prop('disabled', $(this).prop('checked'));
+    });
+});
