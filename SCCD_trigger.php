@@ -112,7 +112,7 @@ header('Content-Type: text/html;charset=UTF-8');
     $all_inc_send_off = null;           // incidents send status is "all off"
     $run_event = "";                    // run test event for the situation(s)
     $err_num = 0;                       // error number for test events
-    $output = ""; 						// top header informational message
+    $output = $connection_SCCD ? "" : "Отсутствует подключение к БД СТП!"; 						// top header informational message
     $log_flag = true;                   // to save in log or not to save
 
 	$log_file = 'logs/SCCD_trigger.log'; // log file
@@ -515,7 +515,7 @@ header('Content-Type: text/html;charset=UTF-8');
 
         // incident number check
         $incident = true;
-        if ($post_command[0] == TO_WORK_MODE or $post_command[0] == TO_MAINTENANCE_MODE or $post_command[0] == TO_BE_NOT_BLUE or $post_command[0] == TO_BE_BLUE) {
+        if ($connection_SCCD and ($post_command[0] == TO_WORK_MODE or $post_command[0] == TO_MAINTENANCE_MODE or $post_command[0] == TO_BE_NOT_BLUE or $post_command[0] == TO_BE_BLUE)) {
             $incident = false;
             // ticket from MAXIMO database check
             $sel = "SELECT TICKETID, CLIENTNAME FROM MAXIMO.TICKET WHERE TICKETID='" . $_COOKIE["incident"] . "' AND \"CLASS\"='SR'";
@@ -864,33 +864,39 @@ header('Content-Type: text/html;charset=UTF-8');
         ob_flush();
         flush();
 
-        foreach ($pfr_ke_tors as $ke_tors) {
-            // record(s) selection from PFR_TEMS_SIT_AGGR table
-            $sel = "SELECT SIT_NAME FROM DB2INST1.PFR_TEMS_SIT_AGGR WHERE PFR_KE_TORS = '{$ke_tors['ke']}' AND SERVICE_NAME = '{$ke_tors['service']}' 
+        if ($connection_SCCD) {
+            foreach ($pfr_ke_tors as $ke_tors) {
+                // record(s) selection from PFR_TEMS_SIT_AGGR table
+                $sel = "SELECT SIT_NAME FROM DB2INST1.PFR_TEMS_SIT_AGGR WHERE PFR_KE_TORS = '{$ke_tors['ke']}' AND SERVICE_NAME = '{$ke_tors['service']}' 
                 UNION 
                 SELECT SIT_NAME FROM DB2INST1.PFR_TEMS_SIT_OVER WHERE PFR_KE_TORS = '{$ke_tors['ke']}' AND SERVICE_NAME = '{$ke_tors['service']}'";
-            $stmt = db2_prepare($connection_TBSM, $sel);
-            $result = db2_execute($stmt);
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
 
-            while ($row = db2_fetch_assoc($stmt))
-                $form_descr_arr[] = $row['SIT_NAME'];
-        }
+                while ($row = db2_fetch_assoc($stmt))
+                    $form_descr_arr[] = $row['SIT_NAME'];
+            }
 
-        $form_descr_arr_unique = array_unique($form_descr_arr);
-        $form_descr_arr = [];
+            $form_descr_arr_unique = array_unique($form_descr_arr);
+            $form_descr_arr = [];
 
-        // get formula description from SCCD
-        $sel = "SELECT CODSIT, NAME, FORMULADESC FROM MAXIMO.TEMPCI WHERE NAME in ('".implode("', '", $form_descr_arr_unique)."')";
-        $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
-        $result_SCCD = db2_execute($stmt_SCCD);
-        while ($row_SCCD = db2_fetch_assoc($stmt_SCCD))
-            $form_descr_arr[$row_SCCD['NAME']] = array (
+            // get formula description from SCCD
+            $sel = "SELECT CODSIT, NAME, FORMULADESC FROM MAXIMO.TEMPCI WHERE NAME in ('" . implode("', '", $form_descr_arr_unique) . "')";
+            $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
+            $result_SCCD = db2_execute($stmt_SCCD);
+            while ($row_SCCD = db2_fetch_assoc($stmt_SCCD))
+                $form_descr_arr[$row_SCCD['NAME']] = array(
                     'code' => $row_SCCD['CODSIT'],
                     'formula' => $row_SCCD['FORMULADESC'],
                 );
 
-        $count_form_descr = count($form_descr_arr);
-        echo $count_form_descr . "<img src='images/ok.png' hspace='10'><br>";
+            $count_form_descr = count($form_descr_arr);
+            echo $count_form_descr . "<img src='images/ok.png' hspace='10'><br>";
+        }
+        else {
+            $form_descr_arr = [];
+            echo "СОЕДИНЕНИЕ С БД СТП ОТСУТСТВУЕТ!<img src='images/error.png' hspace='10'><br>";
+        }
     }
 
     // find all situations
@@ -1062,8 +1068,9 @@ header('Content-Type: text/html;charset=UTF-8');
         ob_flush();
         flush();
 
-        foreach (array_filter($pfr_ke_tors) as $ke_tors) {
-            $sel = "SELECT ci.CINAME, ci.STATUS, ci.ASSETLOCSITEID, cl.CLASSSTRUCTUREID, cl.FAILURECODE, cl.INCTYPEDESC, cl.DELAYMIN, str.CLASSIFICATIONID, str.DESCRIPTION, str.PERSONGROUP, p.DISPLAYNAME
+        if ($connection_SCCD) {
+            foreach (array_filter($pfr_ke_tors) as $ke_tors) {
+                $sel = "SELECT ci.CINAME, ci.STATUS, ci.ASSETLOCSITEID, cl.CLASSSTRUCTUREID, cl.FAILURECODE, cl.INCTYPEDESC, cl.DELAYMIN, str.CLASSIFICATIONID, str.DESCRIPTION, str.PERSONGROUP, p.DISPLAYNAME
                 FROM 
                     (SELECT CINUM, CINAME, STATUS, ASSETLOCSITEID FROM MAXIMO.CI WHERE CINAME = '" . $ke_tors['ke'] . "') AS ci
                 LEFT JOIN MAXIMO.CICLASS cl
@@ -1075,32 +1082,37 @@ header('Content-Type: text/html;charset=UTF-8');
                             LEFT JOIN MAXIMO.PERSON p 
                             ON pgt.RESPPARTYGROUP = p.PERSONID
                     ORDER BY CINAME, FAILURECODE ASC";
-            $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
-            $result = db2_execute($stmt_SCCD);
+                $stmt_SCCD = db2_prepare($connection_SCCD, $sel);
+                $result = db2_execute($stmt_SCCD);
 
-            while ($row = db2_fetch_assoc($stmt_SCCD)) {
-                $table_N3_data[] = array(
-                    "CINAME" => $row['CINAME'],
-                    "STATUS" => $row['STATUS'],
-                    "CLASSIFICATIONID" => $row['CLASSIFICATIONID'],
-                    "CLASSSTRUCTUREID" => $row['CLASSSTRUCTUREID'],
-                    "FAILURECODE" => $row['FAILURECODE'],
-                    "SITNAME" => '',
-                    "INCTYPEDESC" => $row['INCTYPEDESC'],
-                    "DESCRIPTION" => $row['DESCRIPTION'],
-                    "DELAYMIN" => $row['DELAYMIN'],
-                    "PERSONGROUP" => $row['PERSONGROUP'],
-                    "DISPLAYNAME" => $row['DISPLAYNAME'],
-                    "MON_REG" => $ke_tors['reg'],
-                    "ASSETLOCSITEID" => $row['ASSETLOCSITEID'],
-                );
-                $max_delay = $max_delay > $row['DELAYMIN'] ? $max_delay : $row['DELAYMIN'];
+                while ($row = db2_fetch_assoc($stmt_SCCD)) {
+                    $table_N3_data[] = array(
+                        "CINAME" => $row['CINAME'],
+                        "STATUS" => $row['STATUS'],
+                        "CLASSIFICATIONID" => $row['CLASSIFICATIONID'],
+                        "CLASSSTRUCTUREID" => $row['CLASSSTRUCTUREID'],
+                        "FAILURECODE" => $row['FAILURECODE'],
+                        "SITNAME" => '',
+                        "INCTYPEDESC" => $row['INCTYPEDESC'],
+                        "DESCRIPTION" => $row['DESCRIPTION'],
+                        "DELAYMIN" => $row['DELAYMIN'],
+                        "PERSONGROUP" => $row['PERSONGROUP'],
+                        "DISPLAYNAME" => $row['DISPLAYNAME'],
+                        "MON_REG" => $ke_tors['reg'],
+                        "ASSETLOCSITEID" => $row['ASSETLOCSITEID'],
+                    );
+                    $max_delay = $max_delay > $row['DELAYMIN'] ? $max_delay : $row['DELAYMIN'];
+                }
             }
+            $count_tors_info = count($table_N3_data);
+            echo $count_tors_info . "<img src='images/ok.png' hspace='10'><br>";
         }
-
-        $count_tors_info = count($table_N3_data);
-        echo $count_tors_info . "<img src='images/ok.png' hspace='10'><br>";
+        else {
+            $count_tors_info = 0;
+            echo "СОЕДИНЕНИЕ С БД СТП ОТСУТСТВУЕТ!<img src='images/error.png' hspace='10'><br>";
+        }
     }
+
     if (!$light_scheme) {
         echo "Подготовка модели DOM...&emsp;";
         ob_flush();
@@ -2100,7 +2112,7 @@ header('Content-Type: text/html;charset=UTF-8');
     if ($light_scheme)
         echo "<h4 class='not_ke_show'>В упрощённом варианте формы таблица недоступна.</h4>";
     else if($count_tors_info == 0)
-        echo "Данные не найдены.<br \>";
+        echo $connection_SCCD ? "Данные не найдены.<br \>" : "Отсутствует подключение к БД СТП!";
     else {
         echo "<h4 class='table_ke_toggle'>Показать/скрыть таблицу (количество строк: ".$count_tors_info.")</h4>";
         echo "<table class='".($count_tors_info > MIN_STRINGS_TO_HIDE_TABLE ? 'ke_hide' : 'ke_show')."' border='1' cellspacing='0' cellpadding='5'>";
@@ -2170,7 +2182,8 @@ header('Content-Type: text/html;charset=UTF-8');
 
     // database connections close
     db2_close($connection_TBSM);
-    db2_close($connection_SCCD);
+    if ($connection_SCCD)
+        db2_close($connection_SCCD);
 
 	?>
 </body>
