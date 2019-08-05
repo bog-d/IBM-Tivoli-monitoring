@@ -181,7 +181,7 @@ else {
     // KE array from TEMS
     $sel = "select distinct PFR_KE_TORS
             from PFR_TEMS_SIT_AGGR
-            where PFR_KE_TORS <> '' and PFR_KE_TORS like 'SL101%'
+            where PFR_KE_TORS <> ''
             order by PFR_KE_TORS asc";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
