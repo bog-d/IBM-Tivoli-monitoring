@@ -1,3 +1,6 @@
+date_start = '';
+date_finish = '';
+
 $(document).ready(function() {
     var table = $('#events').DataTable( {
         ajax: {
@@ -235,8 +238,14 @@ $(document).ready(function() {
         $( 'input', this.footer() ).on( 'keyup change', function () {
             if ( that.search() !== this.value ) {
                 var attr = $(this).attr('id');
-                if (typeof attr !== typeof undefined && attr !== false && (attr == 'start' || attr == 'finish'))
-                    that.search($('input#start').val() + '*' + $('input#finish').val());
+                if (attr == 'start') {
+                    date_start = this.value;
+                    that.search(date_start + '*' + date_finish);
+                }
+                else if (attr == 'finish') {
+                    date_finish = this.value;
+                    that.search(date_start + '*' + date_finish);
+                }
                 else
                     that.search(this.value);
                 that.draw();
