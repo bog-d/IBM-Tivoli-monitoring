@@ -67,7 +67,7 @@ echo "<table width='100%' border='0' cellspacing='0' cellpadding='5' class='page
             $param = (isset($_GET["ServiceName"]) ? "ServiceName={$_GET["ServiceName"]}&" : "") .
                      (isset($_GET["KE_OBJECT"]) ? "KE_OBJECT={$_GET["KE_OBJECT"]}&" : "") .
                      (isset($_GET["INCIDENT"]) ? "INCIDENT={$_GET["INCIDENT"]}&" : "");
-            echo "<a href='http://10.103.0.60/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br>";
+            echo "<a href='http://{$TBSM_server}/pfr_other/event_history.php?{$param}' target='_blank' title='Перейти к старой версии журнала событий'>Перейти к старой версии</a><br><br>";
             echo "<a class='open_window' href='#' title='Справка по функционалу журнала событий'><img src='images/help.png' hspace='5' height='24' width='24' align='middle' title='Справка по функционалу'>Справка по новой версии</a>";
         echo "</td>";
     echo "</tr>";

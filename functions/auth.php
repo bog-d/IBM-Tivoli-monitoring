@@ -31,8 +31,8 @@ function auth($code_input) {
                 $m = (int)$date_time_array['month'];
                 $y = (int)$date_time_array['year'];
                 $w = $date_time_array['wday'];
-                setcookie('username', $code_input,($w > 0 and $w < 6 and $h >= 9 and $h <= 17) ? mktime(18, 0, 0) : (time() + 3600));
-                setcookie('acsuser', explode(';', $key)[0],($w > 0 and $w < 6 and $h >= 9 and $h <= 17) ? mktime(18, 0, 0) : (time() + 3600));
+                setcookie('username', $code_input,time() + 8*3600);
+                setcookie('acsuser', explode(';', $key)[0],time() + 8*3600);
             }
             return $key;
         }

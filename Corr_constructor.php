@@ -189,13 +189,13 @@ else {
         $ke_arr[] = $row['PFR_KE_TORS'];
 
     // situations array from TEMS
-    $sel = "select distinct SIT_NAME
+    $sel = "select distinct SIT_CODE
             from PFR_TEMS_SIT_AGGR
-            order by SIT_NAME asc";
+            order by SIT_CODE asc";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     while ($row = db2_fetch_assoc($stmt))
-        $sit_arr[] = $row['SIT_NAME'];
+        $sit_arr[] = $row['SIT_CODE'];
 
     // selected chain
     $sel = "select ID, PFR_CORRELATION_CHAIN_ID, PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE
@@ -209,7 +209,7 @@ else {
         echo "<tr id='title'>";
             echo "<th>Имя КЭ</th>";
             echo "<th>Событие</th>";
-            echo "<th>Тип события</th>";
+            echo "<th>Тип события <b>m</b></th>";
             echo "<th><img src='images/delete.png' title='Отметить звенья для удаления'></th>";
         echo "</tr>";
         while ($row = db2_fetch_assoc($stmt)) {
@@ -228,14 +228,17 @@ else {
                             echo "<option value='{$value}' ".($value == $row['PFR_SIT_NAME'] ? 'selected' : '').">{$value}</option>";
                     echo "</select>";
                 echo "</td>";
+//                echo "<td align='center'>";
+//                    echo "<select name = 'type_list[{$row['ID']}]' id='sel_type_{$row['ID']}'>";
+//                        echo "<option value ='m' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'selected' : '').">m</option>";
+//                        echo "<option value ='s' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 's' ? 'selected' : '').">s</option>";
+//                    echo "</select>";
+//                echo "</td>";
                 echo "<td align='center'>";
-                    echo "<select name = 'type_list[{$row['ID']}]' id='sel_type_{$row['ID']}'>";
-                        echo "<option value ='m' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'selected' : '').">m</option>";
-                        echo "<option value ='s' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 's' ? 'selected' : '').">s</option>";
-                    echo "</select>";
+                    echo "<input type='radio' name = 'type_list' id='sel_type_{$row['ID']}' value = '{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'checked' : '').">";
                 echo "</td>";
                 echo "<td align='center'>";
-                    echo "<input type='checkbox' name='chk_del[{$row['ID']}]' id='chk_{$row['ID']}' >";
+                    echo "<input type='checkbox' name='chk_del[{$row['ID']}]' id='chk_{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'disabled' : '').">";
                 echo "</td>";
             echo "</tr>";
         }
@@ -257,14 +260,17 @@ else {
                         echo "<option value='{$value}'>{$value}</option>";
                     echo "</select>";
                 echo "</td>";
+//                echo "<td align='center'>";
+//                    echo "<select name = 'type_list_new[{$i}]' id='sel_type_new_{$i}' ".(($mode == 'new' and $i ==1) ? '' : 'disabled').">";
+//                        echo "<option value ='m' ".(($mode == 'new' and $i ==1) ? 'selected' : '').">m</option>";
+//                        echo "<option value ='s' ".(($mode == 'new' and $i ==1) ? '' : 'selected').">s</option>";
+//                    echo "</select>";
+//                echo "</td>";
                 echo "<td align='center'>";
-                    echo "<select name = 'type_list_new[{$i}]' id='sel_type_new_{$i}' ".(($mode == 'new' and $i ==1) ? '' : 'disabled').">";
-                        echo "<option value ='m' ".(($mode == 'new' and $i ==1) ? 'selected' : '').">m</option>";
-                        echo "<option value ='s' ".(($mode == 'new' and $i ==1) ? '' : 'selected').">s</option>";
-                    echo "</select>";
+                    echo "<input type='radio' name = 'type_list' id='sel_type_new_{$i}' value = 'new_{$i}' ".(($mode == 'new' and $i ==1) ? 'checked' : 'disabled').">";
                 echo "</td>";
                 echo "<td align='center'>";
-                    echo "<input type='checkbox' name='chk_del_new[{$i}]' id='chk_new_{$i}' ".(($mode == 'new' and $i ==1) ? '' : 'checked').">";
+                    echo "<input type='checkbox' name='chk_del_new[{$i}]' id='chk_new_{$i}' ".(($mode == 'new' and $i ==1) ? 'disabled' : 'checked').">";
                 echo "</td>";
             echo "</tr>";
         }

@@ -459,7 +459,7 @@ else {
                         if ($web) {
                             echo "<td>";
                                 $tt = $cell;
-                                echo "<a href=\"http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid=$tt&datasource=NCOMS\" target=\"_blank\" title=\"Переход в СТП к инциденту\">" . $tt . "</a>";
+                                echo "<a href=\"http://{$SCCD_server}/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid=$tt&datasource=NCOMS\" target=\"_blank\" title=\"Переход в СТП к инциденту\">" . $tt . "</a>";
                             echo "</td>";
                         }
                         else {
@@ -479,7 +479,7 @@ else {
                         break;
                     case 'ke':
                         if ($web)
-                            echo "<td>{$cell}<br><font size='-1'> <a href=\"http://10.103.0.60/pfr_other/SCCD_trigger.php?KE={$cell}\" target=\"blank\" title=\"Перейти в 'Настройки интеграции с СТП'\"><img src=\"images/link.png\" align=\"top\" hspace=\"5\">к Интеграции</a><br><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$cell}\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\"><img src=\"images/link_gray.png\" align=\"top\" hspace=\"5\">в ТОРС</a> </font></td>";
+                            echo "<td>{$cell}<br><font size='-1'> <a href=\"http://10.103.0.60/pfr_other/SCCD_trigger.php?KE={$cell}\" target=\"blank\" title=\"Перейти в 'Настройки интеграции с СТП'\"><img src=\"images/link.png\" align=\"top\" hspace=\"5\">к Интеграции</a><br><a href=\"http://{$SCCD_server}/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$cell}\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\"><img src=\"images/link_gray.png\" align=\"top\" hspace=\"5\">в ТОРС</a> </font></td>";
                         else
                             $aSheet->setCellValueByColumnAndRow($col++, $i + 1, $cell);
                         break;

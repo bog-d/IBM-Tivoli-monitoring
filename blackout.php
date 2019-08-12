@@ -31,6 +31,7 @@ if (isset($_POST['formId']['ref'])) {
 require_once 'connections/MAXDB76.php';
 include 'functions/regions.php';
 include 'functions/utime.php';
+include 'functions/tbsm.php';
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -654,7 +655,7 @@ function table_output($el, $show, $expand, $pmchgbociid) {
                     if (empty($cell))
                         echo "<td>Для ТР{$id} нет затронутых КЭ</td>";
                     else
-                        echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a></td>";
+                        echo "<td><a href=\"http://{$GLOBALS['SCCD_server']}/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a></td>";
                     break;
                 case "region":
                     if ($GLOBALS['cur_reg'] == '000')

@@ -82,8 +82,9 @@ if (isset($_POST)) {
         // save existing records
         if (isset($_POST['list_ke'])) {
             foreach ($_POST['list_ke'] as $key => $value) {
+                $event_type = $_POST['type_list'] == $key ? 'm' : 's';
                 $sel = "update PFR_CORRELATIONS 
-                set PFR_KE_TORS = '{$value}', PFR_SIT_NAME = '{$_POST['list_si'][$key]}', PFR_CORRELATION_EVENT_TYPE = '{$_POST['type_list'][$key]}' 
+                set PFR_KE_TORS = '{$value}', PFR_SIT_NAME = '{$_POST['list_si'][$key]}', PFR_CORRELATION_EVENT_TYPE = '$event_type' 
                 where ID = {$key}";
                 $stmt = db2_prepare($connection_TBSM, $sel);
                 $result = db2_execute($stmt);
@@ -119,8 +120,9 @@ if (isset($_POST)) {
             foreach ($_POST['list_ke_new'] as $key => $value) {
                 // save changes if not to delete
                 if (!isset($_POST['chk_del_new']) or !array_key_exists($key, $_POST['chk_del_new'])) {
+                    $event_type = $_POST['type_list'] == "new_{$key}" ? 'm' : 's';
                     $sel = "insert into PFR_CORRELATIONS (PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE, PFR_CORRELATION_CHAIN_ID)  
-                    values ('{$value}', '{$_POST['list_si_new'][$key]}', '{$_POST['type_list_new'][$key]}', {$chain_id})";
+                    values ('{$value}', '{$_POST['list_si_new'][$key]}', '$event_type', {$chain_id})";
                     $stmt = db2_prepare($connection_TBSM, $sel);
                     $result = db2_execute($stmt);
                     if (!$error and !$result)

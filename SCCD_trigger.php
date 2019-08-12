@@ -996,7 +996,7 @@ header('Content-Type: text/html;charset=UTF-8');
                 if (!empty($value['TTNumber'])) {
                     $inc_number = $value['TTNumber'];
                     $arr_AELoff = [];
-                    exec("curl -X POST -d '<UpdateINCIDENT xmlns=\"http://www.ibm.com/maximo\" creationDateTime=\"" . date('c') . "\" transLanguage=\"EN\" messageID=\"123\" maximoVersion=\"7.5\"> <INCIDENTSet><INCIDENT action=\"Change\"><STATUS><![CDATA[CLOSED]]></STATUS><TICKETID>{$inc_number}</TICKETID><WORKLOG action=\"Add\"><CREATEDATE>" . date('c') . "</CREATEDATE><DESCRIPTION_LONGDESCRIPTION><![CDATA[Инцидент закрыт в связи с тех. работами на КЭ]]></DESCRIPTION_LONGDESCRIPTION></WORKLOG></INCIDENT></INCIDENTSet></UpdateINCIDENT>' http://tivoli:12345678@10.103.0.106/meaweb/es/ITM/INCIDENTUpdate", $arr_AELoff);
+                    exec("curl -X POST -d '<UpdateINCIDENT xmlns=\"http://www.ibm.com/maximo\" creationDateTime=\"" . date('c') . "\" transLanguage=\"EN\" messageID=\"123\" maximoVersion=\"7.5\"> <INCIDENTSet><INCIDENT action=\"Change\"><STATUS><![CDATA[CLOSED]]></STATUS><TICKETID>{$inc_number}</TICKETID><WORKLOG action=\"Add\"><CREATEDATE>" . date('c') . "</CREATEDATE><DESCRIPTION_LONGDESCRIPTION><![CDATA[Инцидент закрыт в связи с тех. работами на КЭ]]></DESCRIPTION_LONGDESCRIPTION></WORKLOG></INCIDENT></INCIDENTSet></UpdateINCIDENT>' http://tivoli:12345678@{$SCCD_server}/meaweb/es/ITM/INCIDENTUpdate", $arr_AELoff);
                     if (strpos($arr_AELoff[0], 'record does not exist in the database') !== false)
                         $inc_numbers_arr['Инциденты не существуют в БД'][] = $inc_number;
                     else if (strpos($arr_AELoff[0], 'is in history and must remain unchanged') !== false)
@@ -1819,16 +1819,16 @@ header('Content-Type: text/html;charset=UTF-8');
                         echo "<td align='right'>$value</td>";
                         break;
                     case 'pfr_ke_tors':
-                        echo "<td><a href='http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$value}' target='blank' title='Перейти к КЭ в ТОРС'>{$value}</a></td>";
+                        echo "<td><a href='http://{$SCCD_server}/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME={$value}' target='blank' title='Перейти к КЭ в ТОРС'>{$value}</a></td>";
                         break;
                     case 'TTNumber':
-                        echo "<td align='center'><a href='http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
+                        echo "<td align='center'><a href='http://{$SCCD_server}/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid={$value}&datasource=NCOMS' target='_blank' title='Переход в СТП к инциденту'>{$value}</a></td>";
                         break;
                     case 'pfr_tsrm_worder':
                         echo "<td align='center'>";
                             $worder_arr = array_filter(explode(';',$value));
                             foreach ($worder_arr as $worder)
-                                echo "<a href='http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=:{$worder}&amp;forcereload=true' target='_blank' title='Переход в СТП к РЗ'>{$worder}</a><br>";
+                                echo "<a href='http://{$SCCD_server}/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=:{$worder}&amp;forcereload=true' target='_blank' title='Переход в СТП к РЗ'>{$worder}</a><br>";
                         echo "</td>";
                         break;
                     case 'pfr_tsrm_worder_delay':
@@ -2130,7 +2130,7 @@ header('Content-Type: text/html;charset=UTF-8');
                             case "INCTYPEDESC":
                                 break;
                             case "CINAME":
-                                echo "<td><a href=\"http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a>";
+                                echo "<td><a href=\"http://{$SCCD_server}/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=" . $cell . "\" target=\"blank\" title=\"Перейти к КЭ в ТОРС\">" . $cell . "</a>";
                                 break;
                             case "STATUS":
                                 echo ($cell =='OPERATING' ? "<td class=\"green_status\">" : "<td class=\"blue_status\">").$cell;
@@ -2154,7 +2154,7 @@ header('Content-Type: text/html;charset=UTF-8');
                                 $class_struct = $cell;
                                 break;
                             case "DESCRIPTION":
-                                echo "<td><a href='http://10.103.0.106/maximo/ui/login?event=loadapp&value=ASSETCAT&additionalevent=useqbe&additionaleventvalue=CLASSSTRUCTUREID={$class_struct}'
+                                echo "<td><a href='http://{$SCCD_server}/maximo/ui/login?event=loadapp&value=ASSETCAT&additionalevent=useqbe&additionaleventvalue=CLASSSTRUCTUREID={$class_struct}'
                                              title='Перейти к классификации в ТОРС' target='_blank'>{$class_numb}</a>".(empty($cell) ? "" : " (".$cell.")");
                                 break;
                             case "DELAYMIN":

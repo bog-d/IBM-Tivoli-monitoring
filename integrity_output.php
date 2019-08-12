@@ -17,6 +17,7 @@
 <body>
 	<?php
     require_once 'connections/TBSM.php';
+    require_once 'connections/MAXDB76.php';
 	include 'functions/pfr_checks.php';
     include 'functions/tbsm.php';
     include 'functions/user_roles.php';
@@ -294,14 +295,8 @@
     function region_codes($diff_only) {
 
         $conn = $GLOBALS['connection_TBSM'];
+        $conn_SCCD = $GLOBALS['connection_SCCD'];
         $service = $GLOBALS['service'];
-
-        // MAXDB75 database connection options
-        $database_SCCD = 'MAXDB76';
-        $user_SCCD = 'devusr';
-        $password_SCCD = 'Qwerty123';
-        $hostname_SCCD = '10.103.0.106';
-        $port_SCCD = 50005;
 
         $level = 0;					// iteration level
         $path_history = [ ];		// array for history tree from parents to childs
@@ -356,8 +351,6 @@
         $ke_arr = array_unique(array_column($summ_arr, 'PFR_KE_TORS'));
 
         // KE search in MAXIMO
-        $conn_SCCD_string = "DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database_SCCD;HOSTNAME=$hostname_SCCD;PORT=$port_SCCD;PROTOCOL=TCPIP;UID=$user_SCCD;PWD=$password_SCCD;";
-        $conn_SCCD = db2_connect($conn_SCCD_string, '', '');
         $sel_SCCD = "SELECT CI.CINAME, CI.ASSETLOCSITEID, SITE.DESCRIPTION
                     FROM MAXIMO.CI CI
                     LEFT JOIN MAXIMO.SITE SITE 

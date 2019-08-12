@@ -1,5 +1,6 @@
 date_start = '';
 date_finish = '';
+SCCD_server = '10.103.0.106';
 
 $(document).ready(function() {
     var table = $('#events').DataTable( {
@@ -70,7 +71,7 @@ $(document).ready(function() {
             { data: "PFR_KE_TORS",
                 render: function ( data, type, row ) {
                     return (type === "display" && data.length > 0) ?
-                        '<a href=\'http://10.103.0.106/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=' + data + '\' ' +
+                        '<a href=\'http://' + SCCD_server + '/maximo/ui/login?event=loadapp&value=CI&additionalevent=useqbe&additionaleventvalue=CINAME=' + data + '\' ' +
                         'target=\'blank\' title=\'Перейти в СТП к КЭ...\'>' + data + '</a>' +
                         '<a href="http://10.103.0.60/pfr_other/SCCD_trigger.php?KE=' + data + '" target="_blank"' +
                         'title="Перейти в форму \'Настройка интеграции с СТП\' к КЭ ' + data + '"><img src="images/link.png" align="top" hspace="5"></a>' :
@@ -93,7 +94,7 @@ $(document).ready(function() {
             { data: "TTNUMBER",
                 render: function ( data, type, row ) {
                     return type === "display" ?
-                        '<a href=\'http://10.103.0.106/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid=' + data +
+                        '<a href=\'http://' + SCCD_server + '/maximo/ui/maximo.jsp?event=loadapp&value=incident&additionalevent=useqbe&additionaleventvalue=ticketid=' + data +
                             '&datasource=NCOMS\' target=\'blank\' title=\'Перейти в СТП к инциденту...\'>' + data + '</a>' :
                         data;
                 },
@@ -107,7 +108,7 @@ $(document).ready(function() {
             { data: "CLASSIFICATIONID",
                 render: function ( data, type, row ) {
                     return (type === "display" && data !== null) ?
-                        '<a href=\'http://10.103.0.106/maximo/ui/login?event=loadapp&value=ASSETCAT&additionalevent=useqbe&additionaleventvalue=CLASSIFICATIONID=' + data + '\' ' +
+                        '<a href=\'http://' + SCCD_server + '/maximo/ui/login?event=loadapp&value=ASSETCAT&additionalevent=useqbe&additionaleventvalue=CLASSIFICATIONID=' + data + '\' ' +
                         'target=\'blank\' title=\'Перейти в СТП к классификации...\'>' + data + '</a>' :
                         data;
                 },
@@ -120,7 +121,7 @@ $(document).ready(function() {
             { data: "PFR_TSRM_WORDER",
                 render: function ( data, type, row ) {
                     return type === "display" && data != null ?
-                        '<a href=\'http://10.103.0.106/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=' + data +
+                        '<a href=\'http://' + SCCD_server + '/maximo/ui/?event=loadapp&amp;value=wotrack&amp;additionalevent=useqbe&amp;additionaleventvalue=wonum=' + data +
                             '&amp;forcereload=true\' target=\'blank\' title=\'Перейти в СТП к РЗ...\'>' + data + '</a>' :
                         data;
                 },
@@ -258,7 +259,7 @@ $(document).ready(function() {
         var cell = table.cell( td );
         var serial = cell.data();
 
-        var column = table.column(2);
+        var column = table.column(3);
         var input = $('input', column.footer());
         var search = input.val() == serial ? '' : serial;
 

@@ -80,21 +80,22 @@ function edit_confirm() {
 
 // подтверждение при сохранении цепочки
 function save_confirm() {
-    var m_number = 0;
+    // var m_number = 0;
+    //
+    // $('select[id^=sel_type_]').each(function() {
+    //     if ($(this).val().localeCompare('m') == 0 && $(this).prop('disabled') == false)
+    //         m_number++;
+    // });
+    //
+    // if (m_number == 0) {
+    //     alert('Добавьте звено с типом события "m"!');
+    //     return false;
+    // }
+    // if (m_number > 1) {
+    //     alert('Допустимо только одно звено с типом события "m"!');
+    //     return false;
+    // }
 
-    $('select[id^=sel_type_]').each(function() {
-        if ($(this).val().localeCompare('m') == 0 && $(this).prop('disabled') == false)
-            m_number++;
-    });
-
-    if (m_number == 0) {
-        alert('Добавьте звено с типом события "m"!');
-        return false;
-    }
-    if (m_number > 1) {
-        alert('Допустимо только одно звено с типом события "m"!');
-        return false;
-    }
     if (confirm('Сохранить цепочку в БД?..')) {
         $.ajax({
             type: "POST",
@@ -232,6 +233,17 @@ $(function() {
 
         $('select[id=sel_ke_' + id + ']').prop('disabled', $(this).prop('checked'));
         $('select[id=sel_si_' + id + ']').prop('disabled', $(this).prop('checked'));
-        $('select[id=sel_type_' + id + ']').prop('disabled', $(this).prop('checked'));
+        $('input[id=sel_type_' + id + ']').prop('disabled', $(this).prop('checked'));
+    });
+});
+
+// при изменении радиокнопки "m" изменяются соответствующие переключатели для удаления
+$(function() {
+    $('input[name=type_list]').on('focus', function() {
+        var id = $('[name=type_list]:checked').attr("id").substr(9);
+        $('input[id=chk_' + id + ']').prop('disabled', false);
+    }).change(function() {
+        var id = $(this).attr("id").substr(9);
+        $('input[id=chk_' + id + ']').prop('disabled', true);
     });
 });
