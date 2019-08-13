@@ -233,6 +233,12 @@ div.toggle {
 div.show {
 	display: inline;
 }
+input.width300 {
+	width: 295px;
+}
+select.width300 {
+	width: 300px;
+}
 
 /* ul-treefree start */
 ul.ul-treefree { padding-left:25px; }

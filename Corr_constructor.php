@@ -81,7 +81,8 @@ require 'functions/header_2.php';
 // list of chains
 $sel = "select d.ID, d.PFR_CORRELATION_CHAIN_DESCRIPTION, c.PFR_KE_TORS, c.PFR_SIT_NAME
         from PFR_CORRELATION_CHAIN d, PFR_CORRELATIONS c
-        where d.ID = c.PFR_CORRELATION_CHAIN_ID and c.PFR_CORRELATION_EVENT_TYPE = 'm'";
+        where d.ID = c.PFR_CORRELATION_CHAIN_ID and c.PFR_CORRELATION_EVENT_TYPE = 'm'
+        order by d.PFR_CORRELATION_CHAIN_DESCRIPTION asc";
 $stmt = db2_prepare($connection_TBSM, $sel);
 $result = db2_execute($stmt);
 
@@ -90,7 +91,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
         echo "<tr class='first'>";
             echo "<td>Список корреляционных цепочек:</td>";
             echo "<td>";
-                echo "<input name='chain_search' type='text' size='20' maxlength='32' autofocus placeholder='поиск по подстроке'>";
+                echo "<input name='chain_search' type='text' size='20' maxlength='32' autofocus placeholder='поиск по подстроке' title='Поиск по подстроке в списке цепочек'>";
             echo "</td>";
         echo "</tr>";
         echo "<tr class='first'>";
@@ -135,7 +136,7 @@ echo "</form>";
 // selected chain
 echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formEdit'>";
 if ($mode == 'new')
-    echo"<h3 align='center'>Добавление новой цепочки  \"{$new_chain_name}\"";
+    echo"<h3 align='center'>Добавление новой цепочки <input name='edit_chain_name' type='text' value='{$new_chain_name}' maxlength='256' required>";
 else if ($mode == 'edit') {
     $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION
             from PFR_CORRELATION_CHAIN
@@ -143,7 +144,7 @@ else if ($mode == 'edit') {
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     $row = db2_fetch_assoc($stmt);
-    echo "<h3 align='center'>Редактирование цепочки \"{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}\"";
+    echo "<h3 align='center'>Редактирование цепочки <input name='edit_chain_name' type='text' value='{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}' maxlength='256' required>";
 }
 
 if ($mode != 'view') {
@@ -215,15 +216,15 @@ else {
         while ($row = db2_fetch_assoc($stmt)) {
             echo "<tr>";
                 echo "<td>";
-                    echo "<input name='input' type='text' maxlength='32' placeholder='поиск по подстроке' id='inp_ke_{$row['ID']}'><br/>";
-                    echo "<select size = '1' name = 'list_ke[{$row['ID']}]' id='sel_ke_{$row['ID']}'>";
+                    echo "<input name='input' type='text' maxlength='32' placeholder='поиск по подстроке' id='inp_ke_{$row['ID']}' class='width300' title='Подстрока для поиска КЭ в списке'><br/>";
+                    echo "<select size = '1' name = 'list_ke[{$row['ID']}]' id='sel_ke_{$row['ID']}' class='width300' title='Выберите КЭ из списка...'>";
                         foreach ($ke_arr as $value)
                             echo "<option value='{$value}' ".($value == $row['PFR_KE_TORS'] ? 'selected' : '').">{$value}</option>";
                     echo "</select>";
                 echo "</td>";
                 echo "<td>";
-                    echo "<input name='input' type='text' maxlength='32' placeholder='поиск по подстроке' id='inp_si_{$row['ID']}'><br/>";
-                    echo "<select size = '1' name = 'list_si[{$row['ID']}]' id='sel_si_{$row['ID']}'>";
+                    echo "<input name='input' type='text' maxlength='32' placeholder='поиск по подстроке' id='inp_si_{$row['ID']}' class='width300' title='Подстрока для поиска события в списке'><br/>";
+                    echo "<select size = '1' name = 'list_si[{$row['ID']}]' id='sel_si_{$row['ID']}' class='width300' title='Выберите событие из списка...'>";
                         foreach ($sit_arr as $value)
                             echo "<option value='{$value}' ".($value == $row['PFR_SIT_NAME'] ? 'selected' : '').">{$value}</option>";
                     echo "</select>";
@@ -235,10 +236,10 @@ else {
 //                    echo "</select>";
 //                echo "</td>";
                 echo "<td align='center'>";
-                    echo "<input type='radio' name = 'type_list' id='sel_type_{$row['ID']}' value = '{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'checked' : '').">";
+                    echo "<input type='radio' name = 'type_list' id='sel_type_{$row['ID']}' value = '{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'checked' : '')."  title='Отметить событие с типом m'>";
                 echo "</td>";
                 echo "<td align='center'>";
-                    echo "<input type='checkbox' name='chk_del[{$row['ID']}]' id='chk_{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'disabled' : '').">";
+                    echo "<input type='checkbox' name='chk_del[{$row['ID']}]' id='chk_{$row['ID']}' ".($row['PFR_CORRELATION_EVENT_TYPE'] == 'm' ? 'disabled' : '')." title='Отметить звено для удаления'>";
                 echo "</td>";
             echo "</tr>";
         }

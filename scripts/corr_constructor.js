@@ -152,7 +152,7 @@ function next_confirm() {
         // проверяем наличие цепочки с таким же именем в списке
         $('td.chain_descr').each(function() {
             if ($(this).text().localeCompare(text) == 0) {
-                alert('Цепочка с таким описанием уже имеется!');
+                alert('Цепочка с таким именем уже имеется!');
                 match = true;
             }
         });

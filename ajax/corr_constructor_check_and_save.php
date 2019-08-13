@@ -14,7 +14,7 @@ if (isset($_POST)) {
     $val_arr = [];
 
     $chain_id = $_POST['edit_chain_id'];
-    $chain_name = '';
+    $chain_name = $_POST['edit_chain_name'];
 
     // consistency check
     if (isset($_POST['list_ke']))
@@ -26,41 +26,50 @@ if (isset($_POST)) {
                 $new_arr[] = $value . '`' . $_POST['list_si_new'][$key];
     sort($new_arr);
 
-    $sel = "select ID from PFR_CORRELATION_CHAIN";
+    $sel = "select ID, PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN";
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     while($row = db2_fetch_assoc($stmt))
-        if ($row['ID'] != $chain_id)
+        if ($row['ID'] != $chain_id) {
+            // existing name
+            if (strcmp($chain_name, $row['PFR_CORRELATION_CHAIN_DESCRIPTION']) == 0) {
+                $message = 'Цепочка с таким именем уже имеется!';
+                $check = false;
+                break;
+            }
             $id_arr[] = $row['ID'];
-
-    foreach ($id_arr as $id) {
-        $val_arr = [];
-        $sel = "select PFR_KE_TORS, PFR_SIT_NAME from PFR_CORRELATIONS where PFR_CORRELATION_CHAIN_ID = {$id}";
-        $stmt = db2_prepare($connection_TBSM, $sel);
-        $result = db2_execute($stmt);
-        while($row = db2_fetch_assoc($stmt))
-            $val_arr[] = $row['PFR_KE_TORS'] . '`' . $row['PFR_SIT_NAME'];
-        sort($val_arr);
-
-        if (empty(array_diff($new_arr, $val_arr))) {
-            $check = false;
-            $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$id}";
-            $stmt = db2_prepare($connection_TBSM, $sel);
-            $result = db2_execute($stmt);
-            $row = db2_fetch_assoc($stmt);
-            $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
-            $message = "Все данные этой цепочки содержатся в цепочке \"{$chain_name}\"";
-            break;
         }
-        if (empty(array_diff($val_arr, $new_arr))) {
-            $check = false;
-            $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$id}";
+
+    if ($check) {
+        foreach ($id_arr as $id) {
+            $val_arr = [];
+            $sel = "select PFR_KE_TORS, PFR_SIT_NAME from PFR_CORRELATIONS where PFR_CORRELATION_CHAIN_ID = {$id}";
             $stmt = db2_prepare($connection_TBSM, $sel);
             $result = db2_execute($stmt);
-            $row = db2_fetch_assoc($stmt);
-            $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
-            $message = "Цепочка \"{$chain_name}\" является подмножеством данной цепочки.";
-            break;
+            while ($row = db2_fetch_assoc($stmt))
+                $val_arr[] = $row['PFR_KE_TORS'] . '`' . $row['PFR_SIT_NAME'];
+            sort($val_arr);
+
+            if (empty(array_diff($new_arr, $val_arr))) {
+                $check = false;
+                $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$id}";
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
+                $row = db2_fetch_assoc($stmt);
+                $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
+                $message = "Все данные этой цепочки содержатся в цепочке \"{$chain_name}\"";
+                break;
+            }
+            if (empty(array_diff($val_arr, $new_arr))) {
+                $check = false;
+                $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$id}";
+                $stmt = db2_prepare($connection_TBSM, $sel);
+                $result = db2_execute($stmt);
+                $row = db2_fetch_assoc($stmt);
+                $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
+                $message = "Цепочка \"{$chain_name}\" является подмножеством данной цепочки.";
+                break;
+            }
         }
     }
 
@@ -69,15 +78,15 @@ if (isset($_POST)) {
         // chain name
         if ($chain_id == 0)
             $chain_name = $_POST['new_chain_name'];
-        else {
-            $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$chain_id}";
-            $stmt = db2_prepare($connection_TBSM, $sel);
-            $result = db2_execute($stmt);
-            if (!$error and !$result)
-                $error = true;
-            $row = db2_fetch_assoc($stmt);
-            $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
-        }
+//        else {
+//            $sel = "select PFR_CORRELATION_CHAIN_DESCRIPTION from PFR_CORRELATION_CHAIN where ID = {$chain_id}";
+//            $stmt = db2_prepare($connection_TBSM, $sel);
+//            $result = db2_execute($stmt);
+//            if (!$error and !$result)
+//                $error = true;
+//            $row = db2_fetch_assoc($stmt);
+//            $chain_name = $row['PFR_CORRELATION_CHAIN_DESCRIPTION'];
+//        }
 
         // save existing records
         if (isset($_POST['list_ke'])) {
@@ -113,6 +122,14 @@ if (isset($_POST)) {
             if (!$error and !$result)
                 $error = true;
             $chain_id = db2_last_insert_id($connection_TBSM);
+        }
+        // existing chain
+        else {
+            $sel = "update PFR_CORRELATION_CHAIN set PFR_CORRELATION_CHAIN_DESCRIPTION = '{$chain_name}' where ID = {$chain_id}";
+            $stmt = db2_prepare($connection_TBSM, $sel);
+            $result = db2_execute($stmt);
+            if (!$error and !$result)
+                $error = true;
         }
 
         // new records
