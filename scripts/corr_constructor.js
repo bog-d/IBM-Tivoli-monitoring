@@ -1,3 +1,14 @@
+// окончание загрузки страницы
+$(function() {
+    var total_count = 0;
+
+    $('tr.rec_ch').each(function() {
+        total_count++;
+    });
+
+    $('#chain_count').text(' (всего ' + total_count + ')');
+});
+
 // показ выбранной цепочки в нижней таблице
 $(function() {
     $('tr.rec_ch').click(function() {
@@ -26,6 +37,8 @@ $(function() {
     $('input[name=chain_search]').keyup(function() {
         var search_str = this.value.toUpperCase();
         var comp = false;
+        var show_count = 0;
+        var total_count = 0;
 
         $('tr.rec_ch').each(function() {
             comp = false;
@@ -34,8 +47,10 @@ $(function() {
                     comp = true;
             });
 
-            if (comp)
+            if (comp) {
                 $(this).show();
+                show_count++;
+            }
             else {
                 $(this).hide();
 
@@ -48,7 +63,10 @@ $(function() {
                     $('#chain_id').val(null);
                 }
             }
+            total_count++;
         });
+
+        $('#chain_count').text(show_count == total_count ? ' (всего ' + total_count + ')' : ' (отфильтровано ' + show_count + ' из ' + total_count + ')');
     });
 });
 

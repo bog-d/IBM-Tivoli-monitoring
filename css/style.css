@@ -240,6 +240,33 @@ select.width300 {
 	width: 300px;
 }
 
+.scroll-table {
+	width: 100%;
+	overflow: auto;
+	height: 300px;
+	position: relative;
+}
+.scroll-table table {
+	/*border-collapse: collapse;*/
+	border: 1px solid lightgray;
+}
+.scroll-table td {
+	padding: 5px;
+}
+.scroll-table th {
+	padding: 5px;
+}
+.scroll-table tr.fixed {
+	position: relative;
+	top: 0px;
+	/*top: expression(this.parentElement.parentElement.parentElement.scrollTop);*/
+}
+.scroll-table tbody {
+	/*height: 240px;*/
+	overflow: auto;
+	overflow-x: hidden;
+}
+
 /* ul-treefree start */
 ul.ul-treefree { padding-left:25px; }
 ul.ul-treefree ul { margin:0; padding-left:6px; }

@@ -87,30 +87,37 @@ $stmt = db2_prepare($connection_TBSM, $sel);
 $result = db2_execute($stmt);
 
 echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
-    echo "<br><br><table class='gantt' cellpadding='10' align='center'>";
+        echo "<br><br><table class='gantt' cellpadding='10' align='center'>";
         echo "<tr class='first'>";
-            echo "<td>Список корреляционных цепочек:</td>";
+            echo "<td>Список корреляционных цепочек<span id='chain_count'></span></td>";
+            echo "<td align='right'>Фильтр:</td>";
             echo "<td>";
                 echo "<input name='chain_search' type='text' size='20' maxlength='32' autofocus placeholder='поиск по подстроке' title='Поиск по подстроке в списке цепочек'>";
             echo "</td>";
         echo "</tr>";
         echo "<tr class='first'>";
-            echo "<td valign='top'>";
-                echo "<table cellpadding='10' cellspacing='0' border='1'>";
-                    echo "<tr>";
-                        echo "<th>Имя</th>";
-                        echo "<th>КЭ корневого события</th>";
-                        echo "<th>Код корневого события</th>";
-                    echo "</tr>";
+            echo "<td valign='top' colspan='2'>";
+                echo "<div class='scroll-table'>";
+                    echo "<table>";
+                        echo "<thead>";
+                            echo "<tr class='fixed'>";
+                                echo "<th>Имя цепочки</th>";
+                                echo "<th>КЭ корневого события</th>";
+                                echo "<th>Код корневого события</th>";
+                            echo "</tr>";
+                        echo "</thead>";
 
-                    while ($row = db2_fetch_assoc($stmt)) {
-                        echo "<tr class='rec_ch pointer' chain_id_sel='{$row['ID']}'>";
-                            echo "<td class='chain_descr'>{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}</td>";
-                            echo "<td>{$row['PFR_KE_TORS']}</td>";
-                            echo "<td>{$row['PFR_SIT_NAME']}</td>";
-                        echo "</tr>";
-                    }
-                echo "</table>";
+                        echo "<tbody>";
+                            while ($row = db2_fetch_assoc($stmt)) {
+                                echo "<tr class='rec_ch pointer' chain_id_sel='{$row['ID']}'>";
+                                    echo "<td class='chain_descr'>{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}</td>";
+                                    echo "<td>{$row['PFR_KE_TORS']}</td>";
+                                    echo "<td>{$row['PFR_SIT_NAME']}</td>";
+                                echo "</tr>";
+                            }
+                        echo "</tbody>";
+                    echo "</table>";
+                echo "</div>";
             echo "</td>";
             echo "<td valign='top'>";
                 echo "<button type='button' class='btn_blue' name='new_btn' value='Создать новую' title='Создать цепочку' ".((!$acs_form or $mode == 'new' or $mode == 'edit') ? 'disabled' : '')."><img src='images/new.png'>&emsp;Создать новую </button><br><br>";
@@ -144,7 +151,7 @@ else if ($mode == 'edit') {
     $stmt = db2_prepare($connection_TBSM, $sel);
     $result = db2_execute($stmt);
     $row = db2_fetch_assoc($stmt);
-    echo "<h3 align='center'>Редактирование цепочки <input name='edit_chain_name' type='text' value='{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}' maxlength='256' required>";
+    echo "<h3 align='center'>Редактирование цепочки <input name='edit_chain_name' type='text' value='{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}' maxlength='256' class='width300' required>";
 }
 
 if ($mode != 'view') {
