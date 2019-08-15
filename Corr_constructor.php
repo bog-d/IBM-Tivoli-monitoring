@@ -96,7 +96,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
             echo "</td>";
         echo "</tr>";
         echo "<tr class='first'>";
-            echo "<td valign='top' colspan='2'>";
+            echo "<td valign='top' colspan='2'>"; 
                 echo "<div class='scroll-table'>";
                     echo "<table>";
                         echo "<thead>";

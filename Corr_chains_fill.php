@@ -15,17 +15,23 @@ header('Content-Type: text/html;charset=UTF-8');
 <body>
 <?php
 require_once 'connections/TBSM.php';
+require_once 'functions/corr_chains.php';
 
 const OFFLINE = 'OFFLINE';
+$chains_arr = array (
+    'add'       => 0,
+    'update'    => 0,
+    'exist'     => 0,
+);
 
+// all service names
 $sel_service = "select distinct SERVICE_NAME 
                 from PFR_LOCATIONS 
                 where SERVICE_NAME is not null and SERVICE_NAME <> '' and SERVICE_NAME <> 'n/a'";
 $stmt_service = db2_prepare($connection_TBSM, $sel_service);
 $result_service = db2_execute($stmt_service);
 
-$i = 0;
-$chains_arr = [];
+// ke and situations for each service name
 while ($row_service = db2_fetch_assoc($stmt_service)) {
     $sel_chain = "select distinct PFR_KE_TORS, SIT_CODE 
                     from PFR_TEMS_SIT_AGGR
@@ -37,6 +43,7 @@ while ($row_service = db2_fetch_assoc($stmt_service)) {
     $stmt_chain = db2_prepare($connection_TBSM, $sel_chain);
     $result_chain = db2_execute($stmt_chain);
 
+    // fill array with ke and situations
     $ke_sit_arr = [];
     $simple_ke = '';
     while ($row_chain = db2_fetch_assoc($stmt_chain)) {
@@ -46,31 +53,14 @@ while ($row_service = db2_fetch_assoc($stmt_service)) {
     }
 
     if (!empty($simple_ke) and in_array(OFFLINE, $ke_sit_arr[$simple_ke]) and count($ke_sit_arr) > 1) {
-        $sel = "insert into PFR_CORRELATION_CHAIN (PFR_CORRELATION_CHAIN_DESCRIPTION)  
-                values ('Все агенты на {$row_service['SERVICE_NAME']}')";
-        $stmt = db2_prepare($connection_TBSM, $sel);
-        $result = db2_execute($stmt);
-        $chain_id = db2_last_insert_id($connection_TBSM);
-
-        $j = 0;
-        foreach ($ke_sit_arr as $ke => $sit_arr)
-            foreach ($sit_arr as $sit) {
-                $event_type = (($ke == $simple_ke and $sit == OFFLINE) ? 'm' : 's');
-                $sel = "insert into PFR_CORRELATIONS (PFR_KE_TORS, PFR_SIT_NAME, PFR_CORRELATION_EVENT_TYPE, PFR_CORRELATION_CHAIN_ID)  
-                                            values ('{$ke}', '{$sit}', '{$event_type}', {$chain_id})";
-                $stmt = db2_prepare($connection_TBSM, $sel);
-                $result = db2_execute($stmt);
-                $j++;
-            }
-        $i++;
-        $chains_arr[$j] = array_key_exists($j, $chains_arr) ? ($chains_arr[$j] + 1) : 1;
+        $state = check_and_save_chain("Все агенты на {$row_service['SERVICE_NAME']}", $ke_sit_arr, $simple_ke, OFFLINE);
+        $chains_arr[$state]++;
     }
 }
 
-ksort($chains_arr);
-echo "Добавлено цепочек: {$i}<br><br>";
-foreach ($chains_arr as $j => $count)
-    echo "с кол-вом звеньев {$j}: {$count} шт.<br>";
+echo "Добавлено цепочек: {$chains_arr['add']}<br>";
+echo "Обновлено цепочек: {$chains_arr['update']}<br>";
+echo "Существующих цепочек: {$chains_arr['exist']}<br>";
 
 db2_close($connection_TBSM);
 ?>
