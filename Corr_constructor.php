@@ -79,7 +79,7 @@ require 'functions/header_1.php';
 require 'functions/header_2.php';
 
 // list of chains
-$sel = "select d.ID, d.PFR_CORRELATION_CHAIN_DESCRIPTION, c.PFR_KE_TORS, c.PFR_SIT_NAME
+$sel = "select d.ID, d.PFR_CORRELATION_CHAIN_DESCRIPTION, d.PFR_CORRELATION_CHAIN_INCIDENT_CLOSE, c.PFR_KE_TORS, c.PFR_SIT_NAME
         from PFR_CORRELATION_CHAIN d, PFR_CORRELATIONS c
         where d.ID = c.PFR_CORRELATION_CHAIN_ID and c.PFR_CORRELATION_EVENT_TYPE = 'm'
         order by d.PFR_CORRELATION_CHAIN_DESCRIPTION asc";
@@ -104,6 +104,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
                                 echo "<th>Имя цепочки</th>";
                                 echo "<th>КЭ корневого события</th>";
                                 echo "<th>Код корневого события</th>";
+                                echo "<th>Закрытие инцидента</th>";
                             echo "</tr>";
                         echo "</thead>";
 
@@ -113,6 +114,7 @@ echo "<form action='{$_SERVER['PHP_SELF']}' method='post' id='formSelect'>";
                                     echo "<td class='chain_descr'>{$row['PFR_CORRELATION_CHAIN_DESCRIPTION']}</td>";
                                     echo "<td>{$row['PFR_KE_TORS']}</td>";
                                     echo "<td>{$row['PFR_SIT_NAME']}</td>";
+                                    echo "<td align='center'>".($row['PFR_CORRELATION_CHAIN_INCIDENT_CLOSE'] == 1 ? 'да' : 'нет')."</td>";
                                 echo "</tr>";
                             }
                         echo "</tbody>";

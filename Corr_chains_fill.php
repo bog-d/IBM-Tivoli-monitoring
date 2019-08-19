@@ -35,11 +35,12 @@ $result_service = db2_execute($stmt_service);
 while ($row_service = db2_fetch_assoc($stmt_service)) {
     $sel_chain = "select distinct PFR_KE_TORS, SIT_CODE 
                     from PFR_TEMS_SIT_AGGR
-                    where SIT_CODE = '". OFFLINE ."' and PFR_KE_TORS in (
-                        select distinct PFR_KE_TORS
-                        from PFR_LOCATIONS
-                        where SERVICE_NAME = '{$row_service['SERVICE_NAME']}'
-                    )";
+                    where SIT_CODE in ('OFFLINE', 'UA_ITM_PORT_APPLICATION', 'UA_ITM_PORT_OS', 'UA_ITNM_PORT_APPLICATION', 'UA_ITNM_PORT_OS') 
+                        and PFR_KE_TORS in (
+                            select distinct PFR_KE_TORS
+                            from PFR_LOCATIONS
+                            where SERVICE_NAME = '{$row_service['SERVICE_NAME']}'
+                        )";
     $stmt_chain = db2_prepare($connection_TBSM, $sel_chain);
     $result_chain = db2_execute($stmt_chain);
 
