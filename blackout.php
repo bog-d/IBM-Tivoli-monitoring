@@ -531,7 +531,7 @@ foreach ($ptk_arr as $k => $PTK) {
                             if ($PTK == AIS_1) {
                                 foreach ($table_cells as $row_2)
                                     if (empty($filter_env) or $filter_env == $row_2['environment'])
-                                        if ($row_2['targetname'] == AIS_2 and key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
+                                        if ($row_2['targetname'] == AIS_2 and array_key_exists($row['wonum'], $base_ke_arr) and array_key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
                                             in_array($row_2['ciname'], $base_ke_arr[$row['wonum']][$row['ciname']]) and $row['wonum'] == $row_2['wonum'])
                                             graph_output($row_2, false, false, $row['id'], $base_ke);
                             }
@@ -606,7 +606,7 @@ foreach ($ptk_arr as $k => $PTK) {
                 if ($PTK == AIS_1) {
                     foreach ($table_cells as $row_2)
                         if (empty($filter_env) or $filter_env == $row_2['environment'])
-                            if ($row_2['targetname'] == AIS_2 and key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
+                            if ($row_2['targetname'] == AIS_2 and array_key_exists($row['wonum'], $base_ke_arr) and array_key_exists($row['ciname'], $base_ke_arr[$row['wonum']]) and
                                 in_array($row_2['ciname'], $base_ke_arr[$row['wonum']][$row['ciname']]) and $row['wonum'] == $row_2['wonum'])
                                 table_output($row_2, false, false, $row['id']);
                 }
