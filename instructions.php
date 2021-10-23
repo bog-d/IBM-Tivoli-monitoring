@@ -2,12 +2,12 @@
 <?php
 	header('Content-Type: text/html;charset=UTF-8');
 
-	$database = 'TBSM';
-	$user = 'db2inst1';
-	$password = 'passw0rd';
-	$hostname = 'localhost';
+	$database = '';
+	$user = '';
+	$password = '';
+	$hostname = '';
 	$port = 50000;
-	$base_page = "http://10.103.0.60/pfr_other/Instructions/";
+	$base_page = "";
 	
 	$conn_string = "DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database;" .
 	  "HOSTNAME=$hostname;PORT=$port;PROTOCOL=TCPIP;UID=$user;PWD=$password;";

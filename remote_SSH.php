@@ -25,27 +25,6 @@ include 'functions/regions.php';
 
 // monitoring servers array
 $servers = array (
-    "NCO-MAIN"    => array ("ip" => "10.103.0.57",    "pas" => "passw0rdt1vol1",    "location" => ""),
-    "TDW-MAIN"    => array ("ip" => "10.103.0.58",    "pas" => "passw0rdt1vol1",    "location" => ""),
-    "TBSM-MAIN"   => array ("ip" => "10.103.0.60",    "pas" => "passw0rd"      ,    "location" => ""),
-    "tems-main"   => array ("ip" => "10.103.0.61",    "pas" => "passw0rd"      ,    "location" => ""),
-    "teps-main"   => array ("ip" => "10.103.0.62",    "pas" => "passw0rdt1vol1",    "location" => ""),
-    "TCR-MAIN"    => array ("ip" => "10.103.0.68",    "pas" => "passw0rdt1vol1",    "location" => ""),
-    "RTEMS101128" => array ("ip" => "10.128.161.74",  "pas" => "passw0rdt1vol1",    "location" => "МИЦ СПРЭ"),
-//    "RTEMS101237" => array ("ip" => "10.101.237.73",  "pas" => "passw0rdt1vol1",    "location" => "МИЦ Сеть управления"),
-    "RTEMS128161" => array ("ip" => "10.128.161.74",  "pas" => "passw0rdt1vol1",    "location" => "МИЦ СПРЭ"),
-    "RTEMS129044" => array ("ip" => "10.129.44.13",   "pas" => "passw0rdt1vol1",    "location" => "МИЦ Сеть управления МОДСТЕНД"),
-    "RTEMS136161" => array ("ip" => "10.136.161.21",  "pas" => "passw0rdt1vol1",    "location" => "ТП1"),
-    "RTEMS136177" => array ("ip" => "10.136.177.43",  "pas" => "passw0rdt1vol1",    "location" => "ТП1"),
-    "RTEMS136240" => array ("ip" => "10.136.240.15",  "pas" => "passw0rdt1vol1",    "location" => "ТП1 (МОХД СС)"),
-    "RTEMS137000" => array ("ip" => "10.137.0.27",    "pas" => "passw0rdt1vol1",    "location" => "ТП1 (МОХД СОЭ)"),
-    "RTEMS137046" => array ("ip" => "10.137.46.40",   "pas" => "passw0rdt1vol1",    "location" => "ТП1 (МОХД СС и СОЭ), Подсеть управления"),
-    "RTEMS138148" => array ("ip" => "10.138.148.102", "pas" => "passw0rdt1vol1",    "location" => "ТП1 (Сеть управления)"),
-    "RTEMS143000" => array ("ip" => "10.143.0.50",    "pas" => "passw0rdt1vol1",    "location" => "ТП1 (ГИС ФРИ СПЭ)"),
-    "RTEMS143030" => array ("ip" => "10.143.30.55",   "pas" => "passw0rdt1vol1",    "location" => "ТП1 (ГИС ФРИ СПЭ), Подсеть управления"),
-    "RTEMS164000" => array ("ip" => "10.164.0.31",    "pas" => "passw0rdt1vol1",    "location" => "ТП3 ЕГИССО"),
-    "RTEMS164002" => array ("ip" => "10.164.2.79",    "pas" => "passw0rdt1vol1",    "location" => "ТП3 ЕГИССО"),
-    "RTEMS164004" => array ("ip" => "10.164.4.23",    "pas" => "passw0rdt1vol1",    "location" => "ТП3 ЕГИССО"),
 );
 
 // get script parameters
@@ -240,7 +219,7 @@ $FROM = empty($FROM) ? array_keys($servers)[0] : $FROM;
 // check access button was pressed
 if (isset($_POST['formPing']['sendRequest']) and !empty($command)) {
     $from_server = ($_POST['server'] == 'ITM') ? "ITM{$_POST['region']}" : (($_POST['server'] == 'RTEMS') ? $_POST['rtems'] : $_POST['server']);
-    $server_pass = ($_POST['server'] == 'ITM') ? (array_key_exists("ITM{$_POST['region']}", $array_exeptions) ? $array_exeptions["ITM{$_POST['region']}"]["root_password"] : 'passw0rdt1vol1') : $servers[$from_server]['pas'];
+    $server_pass = ($_POST['server'] == 'ITM') ? (array_key_exists("ITM{$_POST['region']}", $array_exeptions) ? $array_exeptions["ITM{$_POST['region']}"]["root_password"] : '...') : $servers[$from_server]['pas'];
 
     // ssh connection to server
     $connection = ssh2_connect($_POST['server'] == 'RTEMS' ? 'tems-main' : $from_server, 22);

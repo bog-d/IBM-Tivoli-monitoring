@@ -43,20 +43,20 @@ function TEMS_data_reload($reg_array, $PFR_TEMS_SIT_AGGR_fill_update) {
             continue;
         // situations export on teps-main
         if ($reg == '101')
-            remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
+            remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
         // situations export on RPM
         if ($reg != '101')
-            remote_exec('itm' . $reg, 22, 'root', ($reg == '102' or $reg == '013' or $reg == '032' or $reg == '205') ? 'passw0rd' : 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
+            remote_exec('itm' . $reg, 22, 'root', ($reg == '102' or $reg == '013' or $reg == '032' or $reg == '205') ? '...' : '...', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
         // situations move to teps-main
         if ($reg != '101')
-            remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_regions_harvest.sh " . $reg, $log_file_scr, true);
+            remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_regions_harvest.sh " . $reg, $log_file_scr, true);
         // situations import to DB
-        remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_db2_import.sh " . $reg, $log_file_scr, true);
+        remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_db2_import.sh " . $reg, $log_file_scr, true);
     }
 
     // summary table fill
     if ($PFR_TEMS_SIT_AGGR_fill_update)
-        remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/PFR_TEMS_SIT_AGGR_fill.sh", $log_file_scr, true);
+        remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/PFR_TEMS_SIT_AGGR_fill.sh", $log_file_scr, true);
 }
 
 // **************************************************************************************************************************************************
@@ -75,19 +75,19 @@ function TEMS_data_reload_new($reg_array, $PFR_TEMS_SIT_AGGR_fill_update, $expor
         if ($export_situations_from_TEMS) {
             // situations export on teps-main
             if ($reg == '101')
-                remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
+                remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
             // situations export on RPM
             if ($reg != '101')
-                remote_exec('itm' . $reg, 22, 'root', ($reg == '102' or $reg == '013' or $reg == '032' or $reg == '205') ? 'passw0rd' : 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
+                remote_exec('itm' . $reg, 22, 'root', ($reg == '102' or $reg == '013' or $reg == '032' or $reg == '205') ? '...' : '...', "/StorageDisk/SITUATIONS/axibase_export_for_reg.sh", $log_file_scr, true);
             // situations move to teps-main
             if ($reg != '101')
-                remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_regions_harvest.sh " . $reg, $log_file_scr, true);
+                remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_regions_harvest.sh " . $reg, $log_file_scr, true);
             // situations import to DB
-            remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/axibase_db2_import.sh " . $reg, $log_file_scr, true);
+            remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/axibase_db2_import.sh " . $reg, $log_file_scr, true);
         }
         // summary table fill
         if ($PFR_TEMS_SIT_AGGR_fill_update)
-            remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/PFR_TEMS_SIT_AGGR_fill.sh " . $reg, $log_file_scr, true);
+            remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/PFR_TEMS_SIT_AGGR_fill.sh " . $reg, $log_file_scr, true);
     }
 }
 

@@ -662,7 +662,7 @@ header('Content-Type: text/html;charset=UTF-8');
                             // alerts.status update
                             $command = "UPDATE alerts.status SET ImpactFlag='UPDATED' WHERE pfr_ke_tors = '{$row_data['PFR_KE_TORS']}'";
                             file_put_contents($sql_file, $command . ";\ngo\n", LOCK_EX);
-                            shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_file");
+                            shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_file");
                         }
                         $output = "Отправка инцидентов по выбранным строкам ".($post_command[0] == 'Включить' ? 'включена' : 'отключена').".";
                     }
@@ -777,7 +777,7 @@ header('Content-Type: text/html;charset=UTF-8');
             // alerts.status update
             $command = "UPDATE alerts.status SET ImpactFlag='UPDATED' WHERE pfr_ke_tors = '" . $row['PFR_KE_TORS']. "'";
             file_put_contents($sql_file, $command . ";\ngo\n", LOCK_EX);
-            shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_file");
+            shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_file");
 
             // incident send status
             if ($row['INCIDENT_SEND'] == 1) {
@@ -962,7 +962,7 @@ header('Content-Type: text/html;charset=UTF-8');
                         // sql command write to file and execute
                         file_put_contents($sql_file, $command . ";\ngo\n", LOCK_EX);
                         usleep(500000);
-                        $q_string = shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_file");
+                        $q_string = shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_file");
                         $q_status = empty(strcmp(trim($q_string), "(1 row affected)"));
                         if (!$q_status)
                             $err_num++;
@@ -1486,7 +1486,7 @@ header('Content-Type: text/html;charset=UTF-8');
                         echo "<tr>";
                             echo "<td colspan='0'>";
                                 // problems with regional situations upload
-                                if (!remote_exec('teps-main', 22, 'root', 'passw0rdt1vol1', "/StorageDisk/SITUATIONS/check_regions.sh", $log_regions, false))
+                                if (!remote_exec('teps-main', 22, 'root', '...', "/StorageDisk/SITUATIONS/check_regions.sh", $log_regions, false))
                                     echo "!!!";
                                 $i = 0;
                                 foreach (file($log_regions) as $line) {

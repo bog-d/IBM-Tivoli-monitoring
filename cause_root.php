@@ -58,7 +58,7 @@
 		
 		unset($out);
 		$metrics["Selected"][$param] = "";
-		exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_in", $out);
+		exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_in", $out);
 		for ($i = 2; $i < count($out)-1; $i++ ) 
 			$metrics["Selected"][$param] = $metrics["Selected"][$param].$out[$i];
 	}
@@ -67,7 +67,7 @@
 	file_put_contents($sql_in, $command.";\ngo\n", LOCK_EX);
 
 	unset($out);	
-	exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_in", $out);
+	exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_in", $out);
 	for ($i = 2; $i < count($out)-1; $i++ ) 
 		$pfr_cause_serial = $pfr_cause_serial.$out[$i];
 	
@@ -78,7 +78,7 @@
 			
 			unset($out);
 			$metrics["Root"][$param] = "";
-			exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_in", $out);
+			exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_in", $out);
 			for ($i = 2; $i < count($out)-1; $i++ ) 
 				$metrics["Root"][$param] = $metrics["Root"][$param].$out[$i];
 		}

@@ -398,10 +398,10 @@ require 'functions/header_2.php';
         // host select
         if ($action == SELECT_TEMS) {
             // query for nodes, MQ managers and channels on selected TEMS
-            $pass = array_key_exists($tems, $array_exeptions) ? $array_exeptions[$tems]["root_password"] : "passw0rdt1vol1";
+            $pass = array_key_exists($tems, $array_exeptions) ? $array_exeptions[$tems]["root_password"] : "...";
             $hub = array_key_exists($tems, $array_exeptions) ? $array_exeptions[$tems]["HUB"] : 'HUB' . substr($tems, 3, 3);
             remote_exec($tems, 22, 'root', $pass, "echo http://" . $tems . ":1920///cms/soap > /tmp/URLS.txt", '', false);
-            remote_exec($tems, 22, 'root', $pass, "echo \"<CT_Get><userid>sysadmin</userid><password>" . (array_key_exists($tems, $array_exeptions) ? $array_exeptions[$tems]["sysadmin_password"] : "passw0rdt1vol1") . "</password><object>Channel_Summary</object><attribute>Host_Name</attribute><attribute>MQ_Manager_Name</attribute><attribute>Channel_Name</attribute></CT_Get>\" > /tmp/SOAPREQ.txt", '', false);
+            remote_exec($tems, 22, 'root', $pass, "echo \"<CT_Get><userid>sysadmin</userid><password>" . (array_key_exists($tems, $array_exeptions) ? $array_exeptions[$tems]["sysadmin_password"] : "...") . "</password><object>Channel_Summary</object><attribute>Host_Name</attribute><attribute>MQ_Manager_Name</attribute><attribute>Channel_Name</attribute></CT_Get>\" > /tmp/SOAPREQ.txt", '', false);
             remote_exec($tems, 22, 'root', $pass, ". /opt/IBM/ITM/config/" . $tems . "_ms_" . $hub . ".config; /opt/IBM/ITM/lx8266/ms/bin/kshsoap /tmp/SOAPREQ.txt /tmp/URLS.txt", $res_file, false);
 
             // XML prepare

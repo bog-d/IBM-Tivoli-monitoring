@@ -242,7 +242,7 @@ require 'functions/header_2.php';
 
                     // sql command write to file and execute
                     file_put_contents($sql_file, $rec['COMMAND'].";\ngo\n", LOCK_EX);
-                    $q_string = shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password passw0rdt1vol1 -server NCOMS < $sql_file");
+                    $q_string = shell_exec("/opt/IBM/tivoli/netcool/omnibus/bin/nco_sql -user root -password ... -server NCOMS < $sql_file");
                     $q_status = empty(strcmp(trim($q_string), "(1 row affected)"));
                     $output = "Тестовое событие для ситуации ".$rec['SITUATION'].($q_status ? "" : " не ")." сгенерировано".($q_status ? " (".$rec['EVENT_ID'].")." : "!");
                     file_put_contents($log_file_sql, date('d.m.Y H:i:s')."\t".($q_status ? "Y" : "N")."\t".$rec['COMMAND'].";\n", FILE_APPEND | LOCK_EX);
