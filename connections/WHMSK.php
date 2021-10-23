@@ -1,10 +1,10 @@
 <?php
 
 // TBSM database connection options
-$database_WHMSK = 'WHMSK';
-$user_WHMSK = 'db2inst1';
-$password_WHMSK = 'passw0rd';
-$hostname_WHMSK = 'tdw-main';
+$database_WHMSK = '';
+$user_WHMSK = '';
+$password_WHMSK = '';
+$hostname_WHMSK = '';
 $port_WHMSK = 50000;
 $time_start = microtime(true);
 $connection_WHMSK = db2_connect("DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database_WHMSK;HOSTNAME=$hostname_WHMSK;PORT=$port_WHMSK;PROTOCOL=TCPIP;UID=$user_WHMSK;PWD=$password_WHMSK;", '', '');
